@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct NeotrisApp: App {
+    @StateObject private var gameModel = TetrisGameModel()
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -26,6 +28,7 @@ struct NeotrisApp: App {
     var body: some Scene {
         WindowGroup {
             TetrisGameView()
+                .environmentObject(gameModel)
         }
         .modelContainer(sharedModelContainer)
     }

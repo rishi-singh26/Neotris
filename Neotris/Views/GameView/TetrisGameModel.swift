@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 
 class TetrisGameModel: ObservableObject {
+    static let shared = TetrisGameModel();
     // Game board dimensions
     let boardWidth = 10
     let boardHeight = 20
@@ -18,6 +19,7 @@ class TetrisGameModel: ObservableObject {
     @Published var gameBoard: [[Color?]]
     @Published var currentTetromino: Tetromino?
     @Published var nextTetromino: Tetromino?
+    @Published var secondNextTetromino: Tetromino?
     @Published var gameLevel = GameLevel()
     @Published var scoreSystem = ScoreSystem()
     @Published var showLevelUpAnimation: Bool = false
@@ -42,7 +44,6 @@ class TetrisGameModel: ObservableObject {
         gameLevel = GameLevel()
         scoreSystem.reset()
         generateNewTetromino()
-        generateNextTetromino()
         showLevelUpAnimation = false
         
         // Reset ghost piece
@@ -53,7 +54,9 @@ class TetrisGameModel: ObservableObject {
     func startGame() {
         guard gameState != .playing else { return }
         
-        gameState = .playing
+        withAnimation {
+            gameState = .playing
+        }
         
         // Set up game loop
         gameTimer = Timer.publish(every: 0.016, on: .main, in: .common)
@@ -66,7 +69,9 @@ class TetrisGameModel: ObservableObject {
     // Pause the game
     func pauseGame() {
         if gameState == .playing {
-            gameState = .paused
+            withAnimation {
+                gameState = .paused
+            }
             gameTimer?.cancel()
         } else if gameState == .paused {
             resumeGame()
@@ -77,7 +82,9 @@ class TetrisGameModel: ObservableObject {
     func resumeGame() {
         guard gameState == .paused else { return }
         
-        gameState = .playing
+        withAnimation {
+            gameState = .playing
+        }
         
         // Set up game loop again
         gameTimer = Timer.publish(every: 0.016, on: .main, in: .common)
@@ -92,7 +99,9 @@ class TetrisGameModel: ObservableObject {
     
     // End the game
     func endGame() {
-        gameState = .gameOver
+        withAnimation {
+            gameState = .gameOver
+        }
         gameTimer?.cancel()
     }
     
@@ -132,24 +141,24 @@ class TetrisGameModel: ObservableObject {
     private func generateNewTetromino() {
         if let next = nextTetromino {
             currentTetromino = next
+            nextTetromino = secondNextTetromino
         } else {
-            // Start position at the top center of the board
-            let startX = (boardWidth / 2) - 1
-            let type = TetrominoType.allCases.randomElement()!
-            currentTetromino = Tetromino(type: type, startPosition: (x: startX, y: 0))
+            currentTetromino = generateTetromino()
+            nextTetromino = generateTetromino()
         }
         
-        generateNextTetromino()
+        // Generate the next tetromino
+        secondNextTetromino = generateTetromino()
         
         // Update ghost piece for the new tetromino
         updateGhostPiece()
     }
     
-    // Generate the next tetromino
-    private func generateNextTetromino() {
+    private func generateTetromino() -> Tetromino {
+        // Start position at the top center of the board
         let startX = (boardWidth / 2) - 1
         let type = TetrominoType.allCases.randomElement()!
-        nextTetromino = Tetromino(type: type, startPosition: (x: startX, y: 0))
+        return Tetromino(type: type, startPosition: (x: startX, y: 0))
     }
     
     // Check if tetromino can move to a new position

@@ -10,7 +10,7 @@ import SwiftUI
 // Scoring system
 struct ScoreSystem {
     var score: Int = 0
-    var highScore: Int = 0
+    @AppStorage("highScore") var highScore: Int = 0
     
     mutating func addScore(for lines: Int, level: Int) {
         // Enhanced Classic Tetris scoring with level multiplier
