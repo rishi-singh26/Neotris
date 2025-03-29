@@ -52,7 +52,7 @@ struct GameOverView: View {
         .padding(.bottom, 10)
         .padding(.top, 20)
         .background(.ultraThinMaterial)
-        .cornerRadius(20)
+        .cornerRadius(30)
         .padding(8)
         .transition(.scale.combined(with: .opacity))
         .animation(.easeInOut(duration: 0.3), value: gameModel.gameState == .gameOver)

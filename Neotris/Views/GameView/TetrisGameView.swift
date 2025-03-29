@@ -10,6 +10,7 @@ import AVFAudio
 
 // Main game view
 struct TetrisGameView: View {
+    @State private var showSettingSheet = false
     @EnvironmentObject var gameModel: TetrisGameModel
 
     var body: some View {
@@ -28,7 +29,7 @@ struct TetrisGameView: View {
                 HStack {
                     GameBoardView(gameModel: gameModel)
                     
-                    GameRightView()
+                    GameRightView(showSettingsSheet: $showSettingSheet)
                 }
                 .padding(.horizontal, 10)
                 
@@ -68,6 +69,12 @@ struct TetrisGameView: View {
                     }
                 }
         )
+        .sheet(isPresented: $showSettingSheet) {
+            SettingsView()
+                .presentationDetents([.medium, .large])
+                .presentationBackground(.thinMaterial)
+                .presentationCornerRadius(25)
+        }
     }
 }
 

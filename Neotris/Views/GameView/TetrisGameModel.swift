@@ -23,6 +23,9 @@ class TetrisGameModel: ObservableObject {
     @Published var gameLevel = GameLevel()
     @Published var scoreSystem = ScoreSystem()
     @Published var showLevelUpAnimation: Bool = false
+    @Published var gameSoundEnabled: Bool = false
+    @Published var hapticFeedbackEnabled: Bool = false
+    @Published var ghostBlocksEnabled: Bool = false
     
     // Added: Ghost piece position
     @Published var ghostPiecePosition: (x: Int, y: Int)? = nil

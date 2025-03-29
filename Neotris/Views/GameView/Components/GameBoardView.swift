@@ -38,10 +38,10 @@ struct GameBoardView: View {
                   current.absoluteBlockPositions().contains(where: { $0.x == x && $0.y == y }) {
             // Current moving tetromino
             CellBuilder(color: current.type.color)
-        } else if ghostBlocks.contains(where: { $0.x == x && $0.y == y }),
+        } else if gameModel.ghostBlocksEnabled && ghostBlocks.contains(where: { $0.x == x && $0.y == y }),
                   let current = gameModel.currentTetromino {
             // Ghost piece
-            CellBuilder(color: current.type.color.opacity(0.5))
+            CellBuilder(color: current.type.color.opacity(0.4))
         } else {
             // Empty cell
             CellBuilder(color: .black.opacity(0.2))

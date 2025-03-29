@@ -9,6 +9,7 @@ import SwiftUI
 
 struct GameRightView: View {
     @EnvironmentObject var gameModel: TetrisGameModel
+    @Binding var showSettingsSheet: Bool
     
     var body: some View {
         VStack {
@@ -29,7 +30,8 @@ struct GameRightView: View {
                 }
 //                            Spacer()
                 ControlButton(iconName: "switch.2") {
-                    gameModel.moveRight()
+                    gameModel.pauseGame()
+                    showSettingsSheet = true;
                 }
             }
             .padding(14)
@@ -40,7 +42,7 @@ struct GameRightView: View {
 }
 
 #Preview {
-    GameRightView()
+    GameRightView(showSettingsSheet: .constant(false))
 //    TetrisGameView()
         .environmentObject(TetrisGameModel.shared)
 }

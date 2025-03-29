@@ -29,10 +29,10 @@ struct LevelUpView: View {
         }
         .padding(30)
         .background(.ultraThinMaterial)
-        .cornerRadius(15)
+        .cornerRadius(20)
         .padding(10)
         .background(.ultraThinMaterial)
-        .cornerRadius(20)
+        .cornerRadius(30)
         .transition(.scale.combined(with: .opacity))
         .animation(.easeInOut(duration: 0.3), value: gameModel.showLevelUpAnimation)
         .environment(\.colorScheme, .dark)
