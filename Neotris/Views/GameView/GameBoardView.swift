@@ -32,9 +32,10 @@ struct GameBoardView: View {
     @ViewBuilder
     private func cellView(x: Int, y: Int) -> some View {
         let size = cellSize()
+        let ghostBlocks = gameModel.ghostPieceAbsolutePositions()
         
         if let color = gameModel.gameBoard[y][x] {
-            // Cell with tetromino block
+            // Cell with placed tetromino block
             Rectangle()
                 .fill(color)
                 .frame(width: size, height: size)
@@ -51,6 +52,17 @@ struct GameBoardView: View {
                 .overlay(
                     Rectangle()
                         .stroke(Color.black.opacity(0.3), lineWidth: 1)
+                )
+        } else if ghostBlocks.contains(where: { $0.x == x && $0.y == y }),
+                  let current = gameModel.currentTetromino {
+            // Ghost piece
+            Rectangle()
+                .fill(Color.clear)
+                .frame(width: size, height: size)
+                .overlay(
+                    Rectangle()
+                        .stroke(current.type.color.opacity(0.5), lineWidth: 2)
+                        .background(current.type.color.opacity(0.15))
                 )
         } else {
             // Empty cell

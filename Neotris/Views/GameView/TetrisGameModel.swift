@@ -22,6 +22,9 @@ class TetrisGameModel: ObservableObject {
     @Published var scoreSystem = ScoreSystem()
     @Published var showLevelUpAnimation: Bool = false
     
+    // Added: Ghost piece position
+    @Published var ghostPiecePosition: (x: Int, y: Int)? = nil
+    
     // Timer for game loop
     private var gameTimer: AnyCancellable?
     private var lastMoveDownTime: Date = Date()
@@ -41,6 +44,9 @@ class TetrisGameModel: ObservableObject {
         generateNewTetromino()
         generateNextTetromino()
         showLevelUpAnimation = false
+        
+        // Reset ghost piece
+        updateGhostPiece()
     }
     
     // Start the game
@@ -101,6 +107,9 @@ class TetrisGameModel: ObservableObject {
             // Try to move down
             if canMove(current, to: (current.position.x, current.position.y + 1)) {
                 currentTetromino?.position.y += 1
+                
+                // Update ghost piece position when tetromino moves
+                updateGhostPiece()
             } else {
                 // Place the tetromino on the board
                 placeTetromino()
@@ -131,6 +140,9 @@ class TetrisGameModel: ObservableObject {
         }
         
         generateNextTetromino()
+        
+        // Update ghost piece for the new tetromino
+        updateGhostPiece()
     }
     
     // Generate the next tetromino
@@ -224,12 +236,48 @@ class TetrisGameModel: ObservableObject {
         return gameBoard[0].contains(where: { $0 != nil })
     }
     
+    // Added: Update ghost piece position
+    func updateGhostPiece() {
+        guard let current = currentTetromino, gameState == .playing else {
+            ghostPiecePosition = nil
+            return
+        }
+        
+        // Create a copy of the current tetromino
+        let ghostTetromino = current
+        var newY = current.position.y
+        
+        // Find the lowest position the ghost piece can go
+        while canMove(ghostTetromino, to: (ghostTetromino.position.x, newY + 1)) {
+            newY += 1
+        }
+        
+        // Set the ghost piece position
+        ghostPiecePosition = (current.position.x, newY)
+    }
+    
+    // Added: Get ghost piece absolute positions
+    func ghostPieceAbsolutePositions() -> [Block] {
+        guard let current = currentTetromino, let ghostPos = ghostPiecePosition else {
+            return []
+        }
+        
+        // Create a copy of the current tetromino
+        var ghostTetromino = current
+        ghostTetromino.position = ghostPos
+        
+        return ghostTetromino.absoluteBlockPositions()
+    }
+    
     // User input actions
     func moveLeft() {
         guard gameState == .playing, let current = currentTetromino else { return }
         
         if canMove(current, to: (current.position.x - 1, current.position.y)) {
             currentTetromino?.position.x -= 1
+            
+            // Update ghost piece position
+            updateGhostPiece()
         }
     }
     
@@ -238,6 +286,9 @@ class TetrisGameModel: ObservableObject {
         
         if canMove(current, to: (current.position.x + 1, current.position.y)) {
             currentTetromino?.position.x += 1
+            
+            // Update ghost piece position
+            updateGhostPiece()
         }
     }
     
@@ -246,6 +297,9 @@ class TetrisGameModel: ObservableObject {
         
         if canRotate(current) {
             currentTetromino?.rotate()
+            
+            // Update ghost piece position
+            updateGhostPiece()
         }
     }
     
@@ -254,6 +308,9 @@ class TetrisGameModel: ObservableObject {
         
         if canMove(current, to: (current.position.x, current.position.y + 1)) {
             currentTetromino?.position.y += 1
+            
+            // Update ghost piece position
+            updateGhostPiece()
         }
     }
     
