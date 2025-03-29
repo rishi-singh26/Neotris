@@ -25,7 +25,7 @@ struct NeotrisApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TetrisGameView()
         }
         .modelContainer(sharedModelContainer)
     }
