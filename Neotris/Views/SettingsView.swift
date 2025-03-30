@@ -15,25 +15,57 @@ struct SettingsView: View {
         NavigationView {
             List {
                 Section {
-                    Toggle(isOn: $gameModel.hapticFeedbackEnabled) {
-                        Label("Haptic Feedback", systemImage: "hand.tap")
+                    Toggle(isOn: $gameModel.hapticFeedbackEnabled.animation()) {
+                        Label("Haptic Feedback", systemImage: gameModel.hapticFeedbackEnabled ? "hand.tap.fill" : "hand.tap")
                     }
                     .toggleStyle(.switch)
-                    Toggle(isOn: $gameModel.gameSoundEnabled) {
-                        Label("Game Sound", systemImage: "speaker.wave.3")
+                    Toggle(isOn: $gameModel.gameSoundEnabled.animation()) {
+                        Label(
+                            "Game Sound",
+                            systemImage: gameModel.gameSoundEnabled ? "speaker.wave.3.fill" : "speaker.wave.3"
+                        )
                     }
                     .toggleStyle(.switch)
-                    Toggle(isOn: $gameModel.ghostBlocksEnabled) {
-                        Label("Ghost Blocks", systemImage: "square.dashed")
+                    Toggle(isOn: $gameModel.ghostBlocksEnabled.animation().animation()) {
+                        Label(
+                            "Ghost Blocks",
+                            systemImage: gameModel.ghostBlocksEnabled ? "inset.filled.square.dashed" : "square.dashed"
+                        )
                     }
                 }
+                .listRowBackground(
+                    Rectangle()
+                        .fill(.thinMaterial)
+                )
                 
                 Section {
-                    Label("Game History", systemImage: "fossil.shell")
+                    Picker(selection: $gameModel.gameTheme.animation()) {
+                        Label("System", systemImage: "iphone.gen2")
+                            .tag(0)
+                        Label("Light", systemImage: "sun.max")
+                            .tag(1)
+                        Label("Dark", systemImage: "moon.stars")
+                            .tag(2)
+                    } label: {
+                        Label("Game Theme", systemImage: getColorSchemeIcon())
+                    }
+//                    .pickerStyle(.navigationLink)
                 }
+                .listRowBackground(
+                    Rectangle()
+                        .fill(.thinMaterial)
+                )
+                
+                Section {
+                    Label("Games List", systemImage: "list.dash")
+                }
+                .listRowBackground(
+                    Rectangle()
+                        .fill(.thinMaterial)
+                )
             }
             .scrollContentBackground(.hidden)
-            //        .background(Color.mint)
+//                    .background(Color.mint)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(content: {
@@ -46,6 +78,19 @@ struct SettingsView: View {
 
                 }
             })
+        }
+    }
+    
+    private func getColorSchemeIcon() -> String {
+        switch gameModel.gameTheme {
+        case 0:
+            return "iphone.gen2"
+        case 1:
+            return "sun.max"
+        case 2:
+            return "moon.stars"
+        default:
+            return "iphone.gen2"
         }
     }
 }

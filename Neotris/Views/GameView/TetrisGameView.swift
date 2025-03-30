@@ -12,7 +12,8 @@ import AVFAudio
 struct TetrisGameView: View {
     @State private var showSettingSheet = false
     @EnvironmentObject var gameModel: TetrisGameModel
-
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         ZStack {
             // Background
@@ -74,6 +75,20 @@ struct TetrisGameView: View {
                 .presentationDetents([.medium, .large])
                 .presentationBackground(.thinMaterial)
                 .presentationCornerRadius(25)
+        }
+        .environment(\.colorScheme, getColorScheme())
+    }
+    
+    private func getColorScheme() -> ColorScheme {
+        switch gameModel.gameTheme {
+        case 0:
+            return colorScheme
+        case 1:
+            return .light
+        case 2:
+            return .dark
+        default:
+            return colorScheme
         }
     }
 }

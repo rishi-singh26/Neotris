@@ -76,7 +76,7 @@ struct ControlBarView: View {
         case .paused:
             return "play.fill"
         case .gameOver:
-            return "restart"
+            return "plus.circle.fill"
         }
     }
     
@@ -89,7 +89,7 @@ struct ControlBarView: View {
         case .paused:
             return "Resume"
         case .gameOver:
-            return "Start New"
+            return "Start New Game"
         }
     }
 }

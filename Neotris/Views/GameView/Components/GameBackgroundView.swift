@@ -9,10 +9,10 @@ import SwiftUI
 
 struct GameBackgroundView: View {
     private let backgroundColors = [
-        Color(hex: "FFCC01"), Color(hex: "FF9500"), Color(hex: "FF2C55"),
-        Color(hex: "AF52DE"), Color(hex: "FF3C2F"), Color(hex: "FB5C4C"),
-        Color(hex: "007AFF"), Color(hex: "2C8EF3"), Color(hex: "35C759"),
-        Color(hex: "51CA70"), Color(hex: "FED702"), Color(hex: "5856D6")
+        Color(hex: "FDA504"), Color(hex: "F78A12"), Color(hex: "F68913"),
+        Color(hex: "FF3C2F"), Color(hex: "AC537F"), Color(hex: "D66A4F"),
+        Color(hex: "DE7A1C"), Color(hex: "996062"), Color(hex: "5856D6"),
+        Color(hex: "FF2C55"), Color(hex: "DA9F26"), Color(hex: "E7B438")
     ]
 
     var body: some View {
