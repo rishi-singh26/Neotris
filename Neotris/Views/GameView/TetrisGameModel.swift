@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import SwiftData
 
 class TetrisGameModel: ObservableObject {
     static let shared = TetrisGameModel();
@@ -31,14 +32,64 @@ class TetrisGameModel: ObservableObject {
     // Added: Ghost piece position
     @Published var ghostPiecePosition: (x: Int, y: Int)? = nil
     
+    // New: Track game creation time and play duration
+    private var creationDate: Date
+    private var lastPlayedDate: Date
+    private var totalPlayTime: TimeInterval = 0
+    private var sessionStartTime: Date?
+    
     // Timer for game loop
     private var gameTimer: AnyCancellable?
     private var lastMoveDownTime: Date = Date()
     
+    // SwiftData model context
+    private var modelContext: ModelContext?
+    
     // Initialize game
-    init() {
+    init(modelContext: ModelContext? = nil) {
         self.gameBoard = Array(repeating: Array(repeating: nil, count: boardWidth), count: boardHeight)
+        self.creationDate = Date()
+        self.lastPlayedDate = Date()
+        self.modelContext = modelContext
         resetGame()
+    }
+    
+    // Initialize with saved game state
+    init(savedState: SavedGameState, modelContext: ModelContext? = nil) {
+        self.gameBoard = Array(repeating: Array(repeating: nil, count: savedState.gameBoard[0].count), count: savedState.gameBoard.count)
+        self.modelContext = modelContext
+        self.creationDate = savedState.creationDate
+        self.lastPlayedDate = savedState.lastPlayedDate
+        self.totalPlayTime = savedState.totalPlayTime
+        
+        // Initialize the game board with saved colors
+        for y in 0..<savedState.gameBoard.count {
+            for x in 0..<savedState.gameBoard[y].count {
+                if let colorName = savedState.gameBoard[y][x] {
+                    switch colorName {
+                    case "cyan": self.gameBoard[y][x] = .cyan
+                    case "yellow": self.gameBoard[y][x] = .yellow
+                    case "purple": self.gameBoard[y][x] = .purple
+                    case "blue": self.gameBoard[y][x] = .blue
+                    case "orange": self.gameBoard[y][x] = .orange
+                    case "green": self.gameBoard[y][x] = .green
+                    case "red": self.gameBoard[y][x] = .red
+                    default: self.gameBoard[y][x] = nil
+                    }
+                } else {
+                    self.gameBoard[y][x] = nil
+                }
+            }
+        }
+        
+        self.currentTetromino = savedState.currentTetromino
+        self.nextTetromino = savedState.nextTetromino
+        self.gameLevel = savedState.gameLevel
+        self.scoreSystem = savedState.scoreSystem
+        self.gameState = savedState.gameState
+        
+        // Update ghost piece
+        updateGhostPiece()
     }
     
     // Reset the game
@@ -49,6 +100,12 @@ class TetrisGameModel: ObservableObject {
         scoreSystem.reset()
         generateNewTetromino()
         showLevelUpAnimation = false
+        
+        // Reset time tracking
+        creationDate = Date()
+        lastPlayedDate = Date()
+        totalPlayTime = 0
+        sessionStartTime = nil
         
         // Reset ghost piece
         updateGhostPiece()
@@ -61,6 +118,7 @@ class TetrisGameModel: ObservableObject {
         withAnimation {
             gameState = .playing
         }
+        sessionStartTime = Date() // Start tracking session time
         
         // Set up game loop
         gameTimer = Timer.publish(every: 0.016, on: .main, in: .common)
@@ -68,6 +126,9 @@ class TetrisGameModel: ObservableObject {
             .sink { [weak self] _ in
                 self?.gameLoop()
             }
+        
+        // Auto-save the current game state when starting
+        saveCurrentGameState()
     }
     
     // Pause the game
@@ -77,6 +138,15 @@ class TetrisGameModel: ObservableObject {
                 gameState = .paused
             }
             gameTimer?.cancel()
+            
+            // Update play time tracking
+            if let startTime = sessionStartTime {
+                totalPlayTime += Date().timeIntervalSince(startTime)
+                sessionStartTime = nil
+            }
+            
+            // Save current game state when pausing
+            saveCurrentGameState()
         } else if gameState == .paused {
 //            resumeGame()
         }
@@ -86,9 +156,12 @@ class TetrisGameModel: ObservableObject {
     func resumeGame() {
         guard gameState == .paused else { return }
         
+        
         withAnimation {
             gameState = .playing
         }
+        sessionStartTime = Date() // Resume tracking session time
+        lastPlayedDate = Date()
         
         // Set up game loop again
         gameTimer = Timer.publish(every: 0.016, on: .main, in: .common)
@@ -99,6 +172,9 @@ class TetrisGameModel: ObservableObject {
         
         // Reset the last move down time to prevent immediate movement
         lastMoveDownTime = Date()
+        
+        // Save current game state when resuming
+        saveCurrentGameState()
     }
     
     // End the game
@@ -107,6 +183,18 @@ class TetrisGameModel: ObservableObject {
             gameState = .gameOver
         }
         gameTimer?.cancel()
+        
+        // Update play time tracking
+        if let startTime = sessionStartTime {
+            totalPlayTime += Date().timeIntervalSince(startTime)
+            sessionStartTime = nil
+        }
+        
+        // Save completed game to SwiftData
+        saveCompletedGame()
+        
+        // Remove the in-progress game state since it's completed
+        removeCurrentGameState()
     }
     
     // Game loop
@@ -136,6 +224,9 @@ class TetrisGameModel: ObservableObject {
                 // Check if game is over
                 if isGameOver() {
                     endGame()
+                } else {
+                    // Auto-save current game state whenever a piece is placed
+                    saveCurrentGameState()
                 }
             }
         }
@@ -282,7 +373,7 @@ class TetrisGameModel: ObservableObject {
         return ghostTetromino.absoluteBlockPositions()
     }
     
-    // User input actions
+    // MARK: - User input actions
     func moveLeft() {
         guard gameState == .playing, let current = currentTetromino else { return }
         
@@ -344,5 +435,114 @@ class TetrisGameModel: ObservableObject {
             // Update last move down time to prevent immediate movement
             lastMoveDownTime = Date()
         }
+    }
+    
+    // MARK: - Persistence Methods
+    
+    // Save completed game to SwiftData
+    private func saveCompletedGame() {
+        guard let modelContext = modelContext, gameState == .gameOver else { return }
+        
+        // Calculate total play time
+        let completionDate = Date()
+        lastPlayedDate = completionDate
+        
+        // Create game session record
+        let gameSession = TetrisGameSession(
+            creationDate: creationDate,
+            completionDate: completionDate,
+            score: scoreSystem.score,
+            level: gameLevel.level,
+            linesCleared: gameLevel.linesCleared,
+            playDuration: totalPlayTime
+        )
+        
+        // Save to SwiftData
+        modelContext.insert(gameSession)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save completed game: \(error)")
+        }
+    }
+    
+    // Save current game state for later resumption
+    private func saveCurrentGameState() {
+        guard gameState == .playing || gameState == .paused else { return }
+        
+        // Update play time if needed
+        if let startTime = sessionStartTime, gameState == .paused {
+            totalPlayTime += Date().timeIntervalSince(startTime)
+            sessionStartTime = nil
+        }
+        
+        // Update lastPlayedDate
+        lastPlayedDate = Date()
+        
+        // Convert gameBoard colors to string names for serialization
+        var boardColors: [[String?]] = Array(repeating: Array(repeating: nil, count: boardWidth), count: boardHeight)
+        
+        for y in 0..<gameBoard.count {
+            for x in 0..<gameBoard[y].count {
+                if let color = gameBoard[y][x] {
+                    if color == .cyan { boardColors[y][x] = "cyan" }
+                    else if color == .yellow { boardColors[y][x] = "yellow" }
+                    else if color == .purple { boardColors[y][x] = "purple" }
+                    else if color == .blue { boardColors[y][x] = "blue" }
+                    else if color == .orange { boardColors[y][x] = "orange" }
+                    else if color == .green { boardColors[y][x] = "green" }
+                    else if color == .red { boardColors[y][x] = "red" }
+                }
+            }
+        }
+        
+        // Create saved game state
+        let savedState = SavedGameState(
+            gameBoard: boardColors,
+            currentTetromino: currentTetromino,
+            nextTetromino: nextTetromino,
+            gameLevel: gameLevel,
+            scoreSystem: scoreSystem,
+            gameState: gameState,
+            creationDate: creationDate,
+            lastPlayedDate: lastPlayedDate,
+            totalPlayTime: totalPlayTime
+        )
+        
+        // Convert to JSON and save to UserDefaults
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(savedState)
+            UserDefaults.standard.set(data, forKey: "TetrisCurrentGame")
+        } catch {
+            print("Failed to save game state: \(error)")
+        }
+    }
+    
+    // Remove current game state from UserDefaults
+    private func removeCurrentGameState() {
+        UserDefaults.standard.removeObject(forKey: "TetrisCurrentGame")
+    }
+    
+    // Static method to load a saved game if available
+    static func loadSavedGame(modelContext: ModelContext? = nil) -> TetrisGameModel? {
+        guard let data = UserDefaults.standard.data(forKey: "TetrisCurrentGame") else {
+            return nil
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            let savedState = try decoder.decode(SavedGameState.self, from: data)
+            return TetrisGameModel(savedState: savedState, modelContext: modelContext)
+        } catch {
+            print("Failed to load saved game: \(error)")
+            return nil
+        }
+    }
+    
+    // Get game statistics
+    var gameStats: (creationDate: Date, lastPlayed: Date, playTime: TimeInterval) {
+        return (creationDate, lastPlayedDate, totalPlayTime)
     }
 }

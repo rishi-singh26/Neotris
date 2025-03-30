@@ -8,9 +8,9 @@
 import Foundation
 
 // Game state
-enum GameState {
-    case waiting
-    case playing
-    case paused
-    case gameOver
+enum GameState: String, CaseIterable, Codable {
+    case waiting = "waiting"
+    case playing = "playing"
+    case paused = "paused"
+    case gameOver = "gameOver"
 }

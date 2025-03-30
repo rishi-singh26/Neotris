@@ -8,7 +8,7 @@
 import Foundation
 
 // Enhanced Game level and speed
-struct GameLevel {
+struct GameLevel: Codable {
     var level: Int
     var linesCleared: Int
     var maxLevel: Int = 15 // Maximum level cap

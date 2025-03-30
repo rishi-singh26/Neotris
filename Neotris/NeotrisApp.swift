@@ -10,26 +10,42 @@ import SwiftData
 
 @main
 struct NeotrisApp: App {
-    @StateObject private var gameModel = TetrisGameModel()
+    let sharedModelContainer: ModelContainer
     
-    var sharedModelContainer: ModelContainer = {
+    init() {
         let schema = Schema([
-            Item.self,
+            TetrisGameSession.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            sharedModelContainer = try ModelContainer(
+                for: schema,
+//                migrationPlan: TetrisGameSessionMigrationPlan.self,
+                configurations: [modelConfiguration]
+            )
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
-
+    }
+    
     var body: some Scene {
         WindowGroup {
             TetrisGameView()
-                .environmentObject(gameModel)
+                .environmentObject(loadSavedGame())
         }
         .modelContainer(sharedModelContainer)
+        #if os(macOS)
+        .windowStyle(.automatic)
+        .windowResizability(.contentSize)
+        #endif
+    }
+    
+    func loadSavedGame() -> TetrisGameModel {
+        if let savedGame = TetrisGameModel.loadSavedGame(modelContext: sharedModelContainer.mainContext) {
+                    savedGame
+        } else {
+            TetrisGameModel(modelContext: sharedModelContainer.mainContext)
+        }
     }
 }

@@ -37,6 +37,10 @@ extension Color {
          
          self.init(red: r, green: g, blue: b, opacity: a)
     }
+    
+    func withGhostOpacity() -> Color {
+        return self.opacity(0.3)
+    }
 }
 
 // Extension to the Color class to calculate foreground color based on background color luminance
@@ -69,13 +73,4 @@ extension Color {
         let colorLevel: Double = lum > 0.7 ? 0.0 : 1.0
         self.init(red: colorLevel, green: colorLevel, blue: colorLevel, opacity: 1)
     }
-}
-
-// Extends Color to add retro theme colors
-extension Color {
-    static let retroBackground = Color(red: 0.0, green: 0.0, blue: 0.1) // #00001A
-    static let retroGrid = Color(red: 0.2, green: 0.2, blue: 0.3) // #33334D
-    static let retroAccent = Color(red: 0.9, green: 0.2, blue: 0.8) // #E533CC
-    static let retroText = Color(red: 0.9, green: 0.9, blue: 1.0) // #E5E5FF
-    static let retroGold = Color(red: 1.0, green: 0.84, blue: 0.0) // #FFD600
 }

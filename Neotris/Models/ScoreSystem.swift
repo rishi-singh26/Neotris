@@ -8,9 +8,16 @@
 import SwiftUI
 
 // Scoring system
-struct ScoreSystem {
+struct ScoreSystem: Codable {
     var score: Int = 0
-    @AppStorage("highScore") var highScore: Int = 0
+    var highScore: Int = 0
+    
+    private static let highScoreKey = "neotrisHighScore"
+    
+    init() {
+        // Load high score from UserDefaults when initialized
+        highScore = UserDefaults.standard.integer(forKey: ScoreSystem.highScoreKey)
+    }
     
     mutating func addScore(for lines: Int, level: Int) {
         // Enhanced Classic Tetris scoring with level multiplier
@@ -27,6 +34,8 @@ struct ScoreSystem {
         
         if score > highScore {
             highScore = score
+            // Save new high score to UserDefaults
+            UserDefaults.standard.set(highScore, forKey: ScoreSystem.highScoreKey)
         }
     }
     

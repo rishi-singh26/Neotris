@@ -8,7 +8,7 @@
 import SwiftUI
 
 // Tetromino shape types
-enum TetrominoType: CaseIterable {
+enum TetrominoType: String, CaseIterable, Codable {
     case i, o, t, j, l, s, z
     
     // Different colors for different tetromino types

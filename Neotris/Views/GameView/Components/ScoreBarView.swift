@@ -9,8 +9,9 @@ import SwiftUI
 
 struct ScoreBarView: View {
     @EnvironmentObject var gameModel: TetrisGameModel
-        
+    let linesForNextLevel = 5
     var body: some View {
+        let linesClearedInCurrentLevel = (gameModel.gameLevel.linesCleared % 5)
         HStack {
             // New: Speed indicator
 //            Text("(\(gameModel.gameLevel.speedPercentage)% speed)")
@@ -40,9 +41,9 @@ struct ScoreBarView: View {
                 }
                 
                 HStack(spacing: 4) {
-                    ForEach(0..<gameModel.gameLevel.linesToNextLevel, id: \.self) { i in
+                    ForEach(0..<linesForNextLevel, id: \.self) { i in
                         Rectangle()
-                            .fill(Color.gray.opacity(0.3))
+                            .fill(i < (linesClearedInCurrentLevel) ? Color.green : Color.gray.opacity(0.3))
                             .frame(width: 8, height: 8)
 
                     }

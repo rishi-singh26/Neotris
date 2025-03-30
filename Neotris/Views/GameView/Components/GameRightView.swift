@@ -10,6 +10,8 @@ import SwiftUI
 struct GameRightView: View {
     @EnvironmentObject var gameModel: TetrisGameModel
     @Binding var showSettingsSheet: Bool
+    @Binding var showInstructionSheet: Bool
+    @Binding var showSessionSheet: Bool
     
     var body: some View {
         VStack {
@@ -24,14 +26,19 @@ struct GameRightView: View {
 //                        Spacer()
             
             VStack {
+                ControlButton(iconName: "questionmark.circle.fill") {
+                    gameModel.pauseGame()
+                    showInstructionSheet = true
+                }
                 
                 ControlButton(iconName: "list.dash") {
-                    gameModel.rotate()
+                    gameModel.pauseGame()
+                    showSessionSheet = true
                 }
 //                            Spacer()
                 ControlButton(iconName: "switch.2") {
                     gameModel.pauseGame()
-                    showSettingsSheet = true;
+                    showSettingsSheet = true
                 }
             }
             .padding(14)
@@ -42,7 +49,11 @@ struct GameRightView: View {
 }
 
 #Preview {
-    GameRightView(showSettingsSheet: .constant(false))
+    GameRightView(
+        showSettingsSheet: .constant(false),
+        showInstructionSheet: .constant(false),
+        showSessionSheet: .constant(false)
+    )
 //    TetrisGameView()
         .environmentObject(TetrisGameModel.shared)
 }

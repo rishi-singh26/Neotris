@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
-import AVFAudio
 
 // Main game view
 struct TetrisGameView: View {
-    @State private var showSettingSheet = false
+    @State private var showSettingSheet: Bool = false
+    @State private var showInstructionSheet: Bool = false
+    @State private var showSessionSheet: Bool = false
     @EnvironmentObject var gameModel: TetrisGameModel
     @Environment(\.colorScheme) var colorScheme
     
@@ -30,7 +31,11 @@ struct TetrisGameView: View {
                 HStack {
                     GameBoardView(gameModel: gameModel)
                     
-                    GameRightView(showSettingsSheet: $showSettingSheet)
+                    GameRightView(
+                        showSettingsSheet: $showSettingSheet,
+                        showInstructionSheet: $showInstructionSheet,
+                        showSessionSheet: $showSessionSheet
+                    )
                 }
                 .padding(.horizontal, 10)
                 
@@ -72,6 +77,18 @@ struct TetrisGameView: View {
         )
         .sheet(isPresented: $showSettingSheet) {
             SettingsView()
+                .presentationDetents([.medium, .large])
+                .presentationBackground(.thinMaterial)
+                .presentationCornerRadius(25)
+        }
+        .sheet(isPresented: $showInstructionSheet) {
+            GameInstructionsView()
+                .presentationDetents([.medium, .large])
+                .presentationBackground(.thinMaterial)
+                .presentationCornerRadius(25)
+        }
+        .sheet(isPresented: $showSessionSheet) {
+            GameSessionsListView()
                 .presentationDetents([.medium, .large])
                 .presentationBackground(.thinMaterial)
                 .presentationCornerRadius(25)

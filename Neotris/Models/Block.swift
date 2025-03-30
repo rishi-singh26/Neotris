@@ -8,7 +8,7 @@
 import Foundation
 
 // Each Tetromino piece is made up of 4 blocks
-struct Block: Hashable {
+struct Block: Hashable, Codable {
     var x: Int
     var y: Int
 }
