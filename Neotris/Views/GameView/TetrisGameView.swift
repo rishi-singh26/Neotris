@@ -15,16 +15,25 @@ struct TetrisGameView: View {
     @EnvironmentObject var gameModel: TetrisGameModel
     @Environment(\.colorScheme) var colorScheme
     
+    @State private var showAlert: Bool = false
+    @AppStorage("headerText") var headerText: String = "Neotris"
+    
     var body: some View {
         ZStack {
             // Background
             GameBackgroundView()
             
             VStack(spacing: 10) {
-                Text("Neotris")
+                Text(headerText)
                     .foregroundStyle(.white)
                     .font(.largeTitle.bold())
                     .fontDesign(.monospaced)
+                    .gesture(
+                        TapGesture(count: 5)
+                            .onEnded {
+                                showAlert.toggle()
+                            }
+                    )
                 
                 ScoreBarView()
                 
@@ -92,6 +101,30 @@ struct TetrisGameView: View {
                 .presentationDetents([.medium, .large])
                 .presentationBackground(.thinMaterial)
                 .presentationCornerRadius(25)
+        }
+        .alert(isPresented: $showAlert) {
+            /// YOUR ALERT CONTENT IN VIEW FORMAT
+            CustomDialogTwo(
+                title: "Header Text",
+                content: "Update header text",
+                button1: .init(content: "Update", tint: .blue, foreground: .white, action: { text in
+                    headerText = text
+                    showAlert = false
+                }),
+                button2: .init(content: "Reset", tint: .red, foreground: .white, action: { _ in
+                    headerText = "Neotris"
+                    showAlert = false
+                }),
+                addsTextField: true,
+                textFieldHint: "Neotris"
+            )
+            // Since it's using "if" condition to add view we can use SwiftUI Transition
+            // .transition(.blurReplace.combined(with: .push(from: .bottom)))
+            .transition(.scale.combined(with: .opacity))
+            .animation(.easeInOut(duration: 0.3), value: gameModel.gameState == .gameOver)
+        } background: {
+            // YOUR BACKGROUND CONTENT IN VIEW FORMAT
+            // Rectangle().fill(.primary.opacity (0.35))
         }
         .environment(\.colorScheme, getColorScheme())
     }

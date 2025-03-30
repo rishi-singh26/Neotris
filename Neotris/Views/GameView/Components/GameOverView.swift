@@ -47,6 +47,25 @@ struct GameOverView: View {
             .padding(.vertical, 30)
             .background(.ultraThinMaterial)
             .cornerRadius(20)
+            
+//            HStack {
+//                Spacer()
+//                Button(action: {
+//                    gameModel.resetGame()
+//                }) {
+//                    HStack(spacing: gameModel.gameState == .playing ? 0 : 15) {
+//                        Image(systemName: "plus.circle.fill")
+//                        Text("New Game")
+//                    }
+//                    .padding(.horizontal, 60)
+//                    .frame(width: gameModel.gameState == .playing ? 65 : nil, height: 65)
+//                    .background(.thinMaterial)
+//                    .font(.title2.bold())
+//                    .cornerRadius(20)
+//                }
+//                .buttonStyle(PlainButtonStyle())
+//                Spacer()
+//            }
         }
         .padding(.horizontal, 10)
         .padding(.bottom, 10)

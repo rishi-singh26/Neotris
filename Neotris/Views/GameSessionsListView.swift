@@ -8,10 +8,24 @@
 import SwiftUI
 import SwiftData
 
+enum SortBy: String, Codable, CaseIterable {
+    case startDate
+    case endDate
+    case score
+    case level
+    case linesCleared
+    case playDuration
+    
+    var id: Self {
+        self
+    }
+}
+
 struct GameSessionsListView: View {
     @EnvironmentObject var gameModel: TetrisGameModel
     @Environment(\.dismiss) var dismiss
-    @Query private var gameSessions: [TetrisGameSession]
+    @State private var sortBy: SortBy = .startDate
+    @State private var sortOrder: Bool = false
     
     var body: some View {
         NavigationView {
@@ -34,31 +48,30 @@ struct GameSessionsListView: View {
                         .fill(.thinMaterial)
                 )
                 
-                Section(header: Text("Recent Games")) {
-                    if gameSessions.isEmpty {
-                        Text("No completed games yet")
-                            .foregroundColor(.gray)
-                    } else {
-                        ForEach(gameSessions.sorted(by: { $0.completionDate > $1.completionDate }).prefix(10)) { session in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("\(String(session.score)) points - Level \(String(session.level))")
-                                        .font(.headline)
-                                    Text("\(session.completionDate, formatter: dateFormatter)")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                }
-                                Spacer()
-                                VStack(alignment: .trailing) {
-                                    Text(String(session.linesCleared))
-                                        .font(.headline)
-                                    Text("Lines Cleared")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                        }
-                    }
+                Section(header: HStack {
+                    Text("Recent Games")
+                    Spacer()
+//                    Menu {
+//                        Picker("Sort By", selection: $sortBy) {
+//                            Text("Start Date").tag(SortBy.startDate)
+//                            Text("End Date").tag(SortBy.endDate)
+//                            Text("Score").tag(SortBy.score)
+//                            Text("Level").tag(SortBy.level)
+//                            Text("Lines Cleared").tag(SortBy.linesCleared)
+//                            Text("Game Duration").tag(SortBy.playDuration)
+//                        }
+//                        Divider()
+//                        Picker("Sort Order", selection: $sortOrder) {
+//                            Text("Ascending").tag(true)
+//                            Text("Descending").tag(false)
+//                        }
+//                    } label: {
+//                        Label("Sort", systemImage: "chevron.compact.up.chevron.compact.down")
+//                            .font(.footnote)
+//                    }
+                }) {
+//                    GamesListView(sortBy: sortBy, sortOrder: sortOrder)
+                    GamesListView()
                 }
                 .listRowBackground(
                     Rectangle()
@@ -73,6 +86,108 @@ struct GameSessionsListView: View {
                 }
             }
         }
+    }
+}
+
+struct GamesListView: View {
+    @Environment(\.modelContext) var modelContext
+    @Query(sort: \TetrisGameSession.creationDate, order: .reverse) private var gameSessions: [TetrisGameSession]
+    @State private var showDeleteConfirmation = false
+    @State private var selectedSessionForDeletion: TetrisGameSession?
+            
+//    init(sortBy: SortBy, sortOrder: Bool) {
+//        
+//        let sortDescriptors: [SortDescriptor<TetrisGameSession>] = switch sortBy {
+//        case .startDate:
+//            [SortDescriptor(\TetrisGameSession.creationDate, order: sortOrder ? .forward : .reverse)]
+//        case .endDate:
+//            [SortDescriptor(\TetrisGameSession.completionDate, order: sortOrder ? .forward : .reverse)]
+//        case .score:
+//            [SortDescriptor(\TetrisGameSession.score, order: sortOrder ? .forward : .reverse)]
+//        case .level:
+//            [SortDescriptor(\TetrisGameSession.level, order: sortOrder ? .forward : .reverse)]
+//        case .linesCleared:
+//            [SortDescriptor(\TetrisGameSession.linesCleared, order: sortOrder ? .forward : .reverse)]
+//        case .playDuration:
+//            [SortDescriptor(\TetrisGameSession.playDuration, order: sortOrder ? .forward : .reverse)]
+//        }
+//        
+//        _gameSessions = Query(sort: sortDescriptors)
+//    }
+    
+    var body: some View {
+        if gameSessions.isEmpty {
+            Text("No completed games yet")
+                .foregroundColor(.gray)
+        } else {
+            ForEach(gameSessions.sorted(by: { $0.completionDate > $1.completionDate }).prefix(10)) { session in
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("\(String(session.score)) Points - Level \(String(session.level))")
+                            .font(.headline)
+                        Text("\(session.completionDate, formatter: dateFormatter)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        Text(String(session.linesCleared))
+                            .font(.headline)
+                        Text("Lines Cleared")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                }
+                .swipeActions(edge: .trailing) {
+                    Button {
+                        selectedSessionForDeletion = session
+                        showDeleteConfirmation.toggle()
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                    .tint(.red)
+                }
+            }
+            .alert(isPresented: $showDeleteConfirmation) {
+                // YOUR ALERT CONTENT IN VIEW FORMAT
+                CustomDialogTwo(
+                    title: "Alert",
+                    content: "Are you sure you want to delete this game session?",
+                    button1: .init(content: "Delete", tint: .blue, foreground: .white, role: .destructive, action: { _ in
+                        showDeleteConfirmation = false
+                        deleteGame()
+                    }),
+                    button2: .init(content: "Reset", tint: .red, foreground: .white, action: { _ in
+                        showDeleteConfirmation = false
+                    }),
+                    addsTextField: true,
+                    textFieldHint: ""
+                )
+                // Since it's using "if" condition to add view we can use SwiftUI Transition
+                .transition(.scale.combined(with: .opacity))
+                .animation(.easeInOut(duration: 0.3), value: showDeleteConfirmation)
+                // .transition(.blurReplace.combined(with: .push(from: .bottom)))
+                // .transition(.move(edge: .top).combined(with: .opacity))
+            } background: {
+                // YOUR BACKGROUND CONTENT IN VIEW FORMAT
+                // Rectangle().fill(.primary.opacity (0.35))
+            }
+            .confirmationDialog(
+                "Are you sure you want to delete this game session?",
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) {
+                    deleteGame()
+                }
+                Button("Cancel", role: .cancel) { }
+            }
+        }
+    }
+    
+    func deleteGame() {
+        guard let session = selectedSessionForDeletion else { return }
+        modelContext.delete(session)
     }
     
     private var dateFormatter: DateFormatter {
@@ -111,6 +226,6 @@ struct SpeedMeterView: View {
 }
 
 #Preview {
-    GameSessionsListView()
+    TetrisGameView()
         .environmentObject(TetrisGameModel.shared)
 }
