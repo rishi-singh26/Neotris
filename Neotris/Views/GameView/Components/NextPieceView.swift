@@ -42,7 +42,7 @@ struct NextPieceView: View {
     
     @ViewBuilder
     private func CellBuilder(color: Color) -> some View {
-        let size = CGFloat(15)
+        let size = CGFloat(DeviceType.current == .iPhone ? 15 : 22.5)
         Rectangle()
             .fill(color)
             .frame(width: size, height: size)

@@ -14,7 +14,7 @@ struct ControlButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: iconName)
-                .frame(width: 65, height: 65)
+                .frame(width: DeviceType.current == .iPhone ? 65 : 95, height: 65)
                 .background(.thinMaterial)
                 .font(.title2.bold())
                 .cornerRadius(10)

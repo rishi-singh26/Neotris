@@ -16,18 +16,22 @@ struct GameBackgroundView: View {
     ]
 
     var body: some View {
-        MeshGradient(
-            width: 3,
-            height: 4,
-            points: [
-                [0, 0], [0.5, 0], [1.0, 0],
-                [0, 0.4], [0.5, 0.4], [1.0, 0.4],
-                [0, 0.7], [0.5, 0.7], [1.0, 0.7],
-                [0, 1.0], [0.5, 1.0], [1.0, 1.0]
-            ],
-            colors: backgroundColors
-        )
-        .ignoresSafeArea()
+        if #available(macOS 15.0, *) {
+            MeshGradient(
+                width: 3,
+                height: 4,
+                points: [
+                    [0, 0], [0.5, 0], [1.0, 0],
+                    [0, 0.4], [0.5, 0.4], [1.0, 0.4],
+                    [0, 0.7], [0.5, 0.7], [1.0, 0.7],
+                    [0, 1.0], [0.5, 1.0], [1.0, 1.0]
+                ],
+                colors: backgroundColors
+            )
+            .ignoresSafeArea()
+        } else {
+            Color(hex: "FDA504")
+        }
     }
 }
 

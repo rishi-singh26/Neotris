@@ -32,11 +32,13 @@ struct NeotrisApp: App {
     var body: some Scene {
         WindowGroup {
             TetrisGameView()
+                .frame(minWidth: 800, maxWidth: .infinity, minHeight: 900, maxHeight: .infinity)
                 .environmentObject(loadSavedGame())
         }
         .modelContainer(sharedModelContainer)
+        .defaultSize(width: 800, height: 900)
         #if os(macOS)
-        .windowStyle(.automatic)
+        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
         #endif
     }

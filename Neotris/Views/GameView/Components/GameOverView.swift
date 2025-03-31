@@ -73,6 +73,7 @@ struct GameOverView: View {
         .background(.ultraThinMaterial)
         .cornerRadius(30)
         .padding(8)
+        .frame(maxWidth: 400)
         .transition(.scale.combined(with: .opacity))
         .animation(.easeInOut(duration: 0.3), value: gameModel.gameState == .gameOver)
         .environment(\.colorScheme, .dark)

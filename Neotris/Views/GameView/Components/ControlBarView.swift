@@ -61,9 +61,10 @@ struct ControlBarView: View {
             }
         }
         .padding(10)
+        .frame(maxWidth: UIService.screenWidth - 10)
         .background(.ultraThinMaterial)
         .cornerRadius(20)
-        .padding(.horizontal, 10)
+        .padding(.horizontal, DeviceType.current == .iPhone ? 10 : 100)
     }
     
     // Button text changes based on game state

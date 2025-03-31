@@ -29,6 +29,7 @@ fileprivate struct CustomAlertModifier<AlertContent: View, Background: View>: Vi
     func body(content: Content) -> some View {
         content
         // Using Full Screen Cover to show alert content on top of the current context
+#if os(iOS)
             .fullScreenCover(isPresented: $showFullScreenCover) {
                 ZStack {
                     if animatedValue {
@@ -51,6 +52,7 @@ fileprivate struct CustomAlertModifier<AlertContent: View, Background: View>: Vi
                     allowsInteraction = true
                 }
             }
+#endif
             .onChange(of: isPresented) { oldValue, newValue in
                 var transaction = Transaction()
                 transaction.disablesAnimations = true
@@ -202,6 +204,7 @@ struct CustomDialogTwo: View {
                 ButtonView(button1)
             }
         }
+        .frame(minWidth: 345, maxWidth: 345)
         .padding([.horizontal, .bottom], 20)
         .padding(.top, 20)
         .background(.ultraThinMaterial)
