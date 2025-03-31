@@ -80,12 +80,23 @@ struct GameInstructionsView: View {
         .navigationTitle("Instructions")
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
-#endif
+        .toolbar(content: {
+            ToolbarItem {
+                Button {
+                    dismiss()
+                } label: {
+                    Label("Dismiss", systemImage: "xmark.circle.fill")
+                }
+                
+            }
+        })
+#else
         .toolbar {
             Button("Done") {
                 dismiss()
             }
         }
+#endif
     }
 }
 

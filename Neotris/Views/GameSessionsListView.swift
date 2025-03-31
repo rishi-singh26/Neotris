@@ -116,11 +116,16 @@ struct GameSessionsListView: View {
         }
         .scrollContentBackground(.hidden)
         .navigationTitle("Games")
-        .toolbar {
-            Button("Done") {
-                dismiss()
+        .toolbar(content: {
+            ToolbarItem {
+                Button {
+                    dismiss()
+                } label: {
+                    Label("Dismiss", systemImage: "xmark.circle.fill")
+                }
+                
             }
-        }
+        })
     }
 #endif
     

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5B2349602D9AE2B20079E5CB /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 5B23495F2D9AE2B20079E5CB /* LICENSE */; };
+		5B4D27DE2D9AE87000403F60 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 5B4D27DD2D9AE87000403F60 /* MarkdownUI */; };
 		5BADED4B2D9959DD00F78133 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 5BADED4A2D9959DD00F78133 /* README.md */; };
 /* End PBXBuildFile section */
 
@@ -77,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B4D27DE2D9AE87000403F60 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,6 +99,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5B4D27DC2D9AE87000403F60 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5BD571822D7452E0002A10CD = {
 			isa = PBXGroup;
 			children = (
@@ -106,6 +115,7 @@
 				5BD5718D2D7452E0002A10CD /* Neotris */,
 				5BD571A22D7452E2002A10CD /* NeotrisTests */,
 				5BD571AC2D7452E2002A10CD /* NeotrisUITests */,
+				5B4D27DC2D9AE87000403F60 /* Frameworks */,
 				5BD5718C2D7452E0002A10CD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -141,6 +151,7 @@
 			);
 			name = Neotris;
 			packageProductDependencies = (
+				5B4D27DD2D9AE87000403F60 /* MarkdownUI */,
 			);
 			productName = Neotris;
 			productReference = 5BD5718B2D7452E0002A10CD /* Neotris.app */;
@@ -224,6 +235,9 @@
 			);
 			mainGroup = 5BD571822D7452E0002A10CD;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5B2349672D9AE7090079E5CB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5BD5718C2D7452E0002A10CD /* Products */;
 			projectDirPath = "";
@@ -624,6 +638,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5B2349672D9AE7090079E5CB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5B4D27DD2D9AE87000403F60 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5B2349672D9AE7090079E5CB /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5BD571832D7452E0002A10CD /* Project object */;
 }
