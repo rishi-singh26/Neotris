@@ -39,14 +39,23 @@ struct MarkdownWebView: View {
                 Text("Content not found")
             }
         }
+        .frame(minWidth: 400, minHeight: 400)
         .onAppear {
             loadMarkdown()
         }
         .toolbar {
             if let markdownContent = markdownContent, !markdownContent.isEmpty {
+#if os(macOS)
                 Button("Export") {
                     exportMarkdown()
                 }
+#else
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Export") {
+                        exportMarkdown()
+                    }
+                }
+#endif
             }
         }
         .fileExporter(isPresented: $showingFileExporter, document: MarkdownDocument(markdownContent ?? ""), contentType: UTType(filenameExtension: "md")!, defaultFilename: url.lastPathComponent) { result in

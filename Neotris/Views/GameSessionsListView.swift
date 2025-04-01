@@ -158,7 +158,7 @@ struct GamesListView: View {
     @Query(sort: \TetrisGameSession.creationDate, order: .reverse) private var gameSessions: [TetrisGameSession]
     @State private var showDeleteConfirmation = false
     @State private var selectedSessionForDeletion: TetrisGameSession?
-            
+
     init(sortBy: SortBy, sortOrder: Bool) {
         
         let sortDescriptors: [SortDescriptor<TetrisGameSession>] = switch sortBy {
@@ -186,44 +186,36 @@ struct GamesListView: View {
                 VStack {
                     SessionTileBuilder(session: session)
 #if os(macOS)
-                    Divider()
+                    if gameSessions.last?.id != session.id {
+                        Divider()
+                    }
 #endif
                 }
 
 #if os(iOS)
                 .swipeActions(edge: .trailing) {
                     Button {
-                        selectedSessionForDeletion = session
-                        showDeleteConfirmation.toggle()
+                        showDeleteConfirmation(session: session)
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
                     .tint(.red)
                 }
 #endif
+                .contextMenu {
+                    Button(role: .destructive, action: {
+                        showDeleteConfirmation(session: session)
+                    }, label: {
+                        Label("Delete", systemImage: "trash")
+                    })
+                }
             }
-            .alert(isPresented: $showDeleteConfirmation) {
-                // YOUR ALERT CONTENT IN VIEW FORMAT
-                CustomDialogTwo(
-                    title: "Alert",
-                    content: "Are you sure you want to delete this game session?",
-                    button1: .init(content: "Delete", tint: .blue, foreground: .white, role: .destructive, action: { _ in
-                        showDeleteConfirmation = false
-                        deleteGame()
-                    }),
-                    button2: .init(content: "Cancel", tint: .red, foreground: .white, action: { _ in
-                        showDeleteConfirmation = false
-                    }),
-                    textFieldHint: ""
-                )
-                // Since it's using "if" condition to add view we can use SwiftUI Transition
-                .transition(.scale.combined(with: .opacity))
-                .animation(.easeInOut(duration: 0.3), value: showDeleteConfirmation)
-                // .transition(.blurReplace.combined(with: .push(from: .bottom)))
-                // .transition(.move(edge: .top).combined(with: .opacity))
-            } background: {
-                // YOUR BACKGROUND CONTENT IN VIEW FORMAT
-                // Rectangle().fill(.primary.opacity (0.35))
+            .confirmationDialog("Alert", isPresented: $showDeleteConfirmation, actions: {
+                Button("Delete", role: .destructive) {
+                    deleteGame()
+                }
+            }) {
+                Text("Are you sure you want to delete this game session?")
             }
         }
     }
@@ -239,14 +231,31 @@ struct GamesListView: View {
                     .foregroundColor(.gray)
             }
             Spacer()
-            VStack(alignment: .trailing) {
-                Text(String(session.linesCleared))
-                    .font(.headline)
-                Text("Lines Cleared")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+            HStack(spacing: 10) {
+                VStack(alignment: .trailing) {
+                    Text(String(session.linesCleared))
+                        .font(.headline)
+                    Text("Lines Cleared")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                
+#if os(macOS)
+                Button {
+                    showDeleteConfirmation(session: session)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(PlainButtonStyle())
+#endif
+
             }
         }
+    }
+    
+    func showDeleteConfirmation(session: TetrisGameSession) {
+        selectedSessionForDeletion = session
+        showDeleteConfirmation.toggle()
     }
     
     func deleteGame() {
