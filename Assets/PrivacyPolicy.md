@@ -80,7 +80,7 @@ We implement appropriate technical measures to protect your information. Since g
 We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Effective Date" at the top of this policy.
 
 
-## 12. GOVERNING LAW
+## GOVERNING LAW
 
 This Privacy Policy shall be governed by and construed in accordance with the laws of India, without regard to its conflict of law provisions.
 

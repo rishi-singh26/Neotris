@@ -19,11 +19,10 @@ The Neotris source code is available under the MIT License. This means you may f
 ### 2.3 Restrictions
 You agree not to:
 - Use the App for any illegal purpose or in violation of any local, state, national, or international law
-- Interfere with or disrupt the operation of the App or servers connected to the App
+- Interfere with or disrupt the operation of the App
 - Distribute, license, sell, rent, lease, or otherwise transfer the App to any third party
 - Remove, alter, or obscure any proprietary notices on the App
 - Attempt to reverse engineer, decompile, or disassemble the App, except as permitted by applicable law
-- Use automated systems to access the App in a manner that sends more requests than a human could reasonably generate in the same period
 
 ## 3. USER CONDUCT
 
@@ -57,32 +56,23 @@ You agree to defend, indemnify, and hold harmless the developers of Neotris, the
 
 We may terminate or suspend your access to the App immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach these Terms. Upon termination, your right to use the App will immediately cease.
 
-## 10. APPLE APP STORE TERMS
-
-You acknowledge and agree that:
-- These Terms are concluded between you and the developers of Neotris, not with Apple, Inc. ("Apple")
-- Apple has no obligation to furnish any maintenance and support services with respect to the App
-- In the event of any failure of the App to conform to any applicable warranty, you may notify Apple, and Apple will refund the purchase price for the App to you (if applicable)
-- Apple is not responsible for addressing any claims by you or any third party relating to the App or your possession and/or use of the App
-- Apple is a third-party beneficiary of these Terms and will have the right to enforce these Terms against you as a third-party beneficiary
-
-## 11. CHANGES TO TERMS
+## 10. CHANGES TO TERMS
 
 We reserve the right to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
 
-## 12. GOVERNING LAW
+## 11. GOVERNING LAW
 
 These Terms shall be governed by and construed in accordance with the laws of India, without regard to its conflict of law provisions.
 
-## 13. CONTACT INFORMATION
+## 12. CONTACT INFORMATION
 
 If you have any questions about these Terms, please contact us through our GitHub repository for Neotris.
 
-## 14. SEVERABILITY
+## 13. SEVERABILITY
 
 If any provision of these Terms is held to be unenforceable or invalid, such provision will be changed and interpreted to accomplish the objectives of such provision to the greatest extent possible under applicable law and the remaining provisions will continue in full force and effect.
 
-## 15. ENTIRE AGREEMENT
+## 14. ENTIRE AGREEMENT
 
 These Terms constitute the entire agreement between you and us regarding your use of the App and supersede all prior and contemporaneous written or oral agreements between you and us.
 
