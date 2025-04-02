@@ -33,14 +33,14 @@ struct SettingsView: View {
                 .padding(.bottom, -1)
                 ScrollView {
                     MacCustomSection {
-                        HStack(alignment: .center) {
-                            Text("Haptic Feedback")
-                                .frame(width: 150, alignment: .leading)
-                            Spacer()
-                            Toggle("", isOn: $gameModel.hapticFeedbackEnabled.animation())
-                                .toggleStyle(.switch)
-                        }
-                        Divider()
+                        //                        HStack(alignment: .center) {
+                        //                            Text("Haptic Feedback")
+                        //                                .frame(width: 150, alignment: .leading)
+                        //                            Spacer()
+                        //                            Toggle("", isOn: $gameModel.hapticFeedbackEnabled.animation())
+                        //                                .toggleStyle(.switch)
+                        //                        }
+                        //                        Divider()
                         //                    HStack(alignment: .center) {
                         //                        Text("Game Sound")
                         //                            .frame(width: 150, alignment: .leading)
@@ -88,13 +88,13 @@ struct SettingsView: View {
                             CustomLabel(leadingImageName: "list.bullet.rectangle.portrait", trailingImageName: "chevron.up", title: "Terms of Use")
                         }
                         .buttonStyle(PlainButtonStyle())
-                        Divider().padding(.vertical, 2)
-                        Button {
-                            showUsageLicense = true
-                        } label: {
-                            CustomLabel(leadingImageName: "checkmark.seal", trailingImageName: "chevron.up", title: "Usage License")
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                        //                        Divider().padding(.vertical, 2)
+                        //                        Button {
+                        //                            showUsageLicense = true
+                        //                        } label: {
+                        //                            CustomLabel(leadingImageName: "checkmark.seal", trailingImageName: "chevron.up", title: "Usage License")
+                        //                        }
+                        //                        .buttonStyle(PlainButtonStyle())
                         Divider().padding(.vertical, 2)
                         Link(destination: URL(string: "https://github.com/rishi-singh26/Neotris")!) {
                             CustomLabel(leadingImageName: "lock.open.display", trailingImageName: "arrow.up.right", title: "Open Source Code")
@@ -112,7 +112,7 @@ struct SettingsView: View {
                         Divider().padding(.vertical, 2)
                         Text("Neotris v.1.0.0")
                     }
-                        .padding(.bottom)
+                    .padding(.bottom)
                 }
                 .padding(.bottom)
             }
@@ -178,12 +178,12 @@ struct SettingsView: View {
                         } label: {
                             CustomLabel(leadingImageName: "list.bullet.rectangle.portrait", trailingImageName: "chevron.up", title: "Terms of Use")
                         }
-                        Button {
-                            showUsageLicense = true
-                        } label: {
-                            CustomLabel(leadingImageName: "checkmark.seal", trailingImageName: "chevron.up", title: "Usage License")
-                        }
-                        Link(destination: URL(string: "https://github.com/rishi-singh26/i2048")!) {
+                        //                        Button {
+                        //                            showUsageLicense = true
+                        //                        } label: {
+                        //                            CustomLabel(leadingImageName: "checkmark.seal", trailingImageName: "chevron.up", title: "Usage License")
+                        //                        }
+                        Link(destination: URL(string: "https://github.com/rishi-singh26/Neotris")!) {
                             CustomLabel(leadingImageName: "lock.open.display", trailingImageName: "arrow.up.right", title: "Open Source Code")
                         }
                     }

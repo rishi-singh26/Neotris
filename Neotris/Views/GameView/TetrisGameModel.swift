@@ -8,9 +8,13 @@
 import SwiftUI
 import Combine
 import SwiftData
+import CoreHaptics
 
 class TetrisGameModel: ObservableObject {
     static let shared = TetrisGameModel();
+    
+    private var hapticEngine: CHHapticEngine?
+    
     // Game board dimensions
     let boardWidth = 10
     let boardHeight = 20
@@ -25,9 +29,17 @@ class TetrisGameModel: ObservableObject {
     @Published var scoreSystem = ScoreSystem()
     @Published var showLevelUpAnimation: Bool = false
     @AppStorage("gameSoundEnabled") var gameSoundEnabled: Bool = true
-    @AppStorage("hapticFeedbackEnabled") var hapticFeedbackEnabled: Bool = true
     @AppStorage("ghostBlocksEnabled") var ghostBlocksEnabled: Bool = true
     @AppStorage("gameTheme") var gameTheme: Int = 0 // 0 -> System, 1 -> Light, 2 -> Dark
+    @AppStorage("hapticFeedbackEnabled") var hapticFeedbackEnabled: Bool = false {
+        didSet {
+            if hapticFeedbackEnabled {
+                prepareHapticEngine()
+            } else {
+                stopEngine()
+            }
+        }
+    }
     
     // Added: Ghost piece position
     @Published var ghostPiecePosition: (x: Int, y: Int)? = nil
@@ -52,6 +64,10 @@ class TetrisGameModel: ObservableObject {
         self.lastPlayedDate = Date()
         self.modelContext = modelContext
         resetGame()
+        
+        if self.hapticFeedbackEnabled {
+            prepareHapticEngine()
+        }
     }
     
     // Initialize with saved game state
@@ -90,6 +106,10 @@ class TetrisGameModel: ObservableObject {
         
         // Update ghost piece
         updateGhostPiece()
+        
+        if self.hapticFeedbackEnabled {
+            prepareHapticEngine()
+        }
     }
     
     // Reset the game
@@ -139,6 +159,9 @@ class TetrisGameModel: ObservableObject {
             }
             gameTimer?.cancel()
             
+            // Stop the haptic engine
+            hapticEngine?.stop()
+            
             // Update play time tracking
             if let startTime = sessionStartTime {
                 totalPlayTime += Date().timeIntervalSince(startTime)
@@ -163,6 +186,9 @@ class TetrisGameModel: ObservableObject {
         sessionStartTime = Date() // Resume tracking session time
         lastPlayedDate = Date()
         
+        // Restart the haptic engine
+        try? hapticEngine?.start()
+        
         // Set up game loop again
         gameTimer = Timer.publish(every: 0.016, on: .main, in: .common)
             .autoconnect()
@@ -183,6 +209,9 @@ class TetrisGameModel: ObservableObject {
             gameState = .gameOver
         }
         gameTimer?.cancel()
+        
+        // Game over haptic feedback
+        playFailureHaptic()
         
         // Update play time tracking
         if let startTime = sessionStartTime {
@@ -214,6 +243,9 @@ class TetrisGameModel: ObservableObject {
             } else {
                 // Place the tetromino on the board
                 placeTetromino()
+                
+                // Provide haptic feedback when piece lands
+//                playHapticPattern(intensity: 0.5, sharpness: 0.7)
                 
                 // Check for completed lines
                 checkForCompletedLines()
@@ -322,9 +354,23 @@ class TetrisGameModel: ObservableObject {
             // Add lines and check if level increased
             let didLevelUp = gameLevel.addLines(completedLines)
             
+            // Provide haptic feedback for line clear (intensity based on number of lines cleared)
+            switch completedLines {
+            case 4:
+                // Tetris (4 lines) gets the strongest feedback
+                playHapticPattern(intensity: 1.0, sharpness: 1.0, duration: 0.3)
+            case 2...3:
+                playHapticPattern(intensity: 0.7, sharpness: 0.8, duration: 0.2)
+            default:
+                playHapticPattern(intensity: 0.5, sharpness: 0.6, duration: 0.1)
+            }
+            
             // Show level up animation if needed
             if didLevelUp {
                 showLevelUpAnimation = true
+                
+                // Special haptic feedback for level up
+                playSuccessHaptic()
                 
                 // Hide the animation after a delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
@@ -380,6 +426,9 @@ class TetrisGameModel: ObservableObject {
         if canMove(current, to: (current.position.x - 1, current.position.y)) {
             currentTetromino?.position.x -= 1
             
+            // Light haptic for movement
+            playHapticPattern(intensity: 0.3, sharpness: 0.5)
+            
             // Update ghost piece position
             updateGhostPiece()
         }
@@ -390,6 +439,9 @@ class TetrisGameModel: ObservableObject {
         
         if canMove(current, to: (current.position.x + 1, current.position.y)) {
             currentTetromino?.position.x += 1
+            
+            // Light haptic for movement
+            playHapticPattern(intensity: 0.3, sharpness: 0.5)
             
             // Update ghost piece position
             updateGhostPiece()
@@ -402,6 +454,9 @@ class TetrisGameModel: ObservableObject {
         if canRotate(current) {
             currentTetromino?.rotate()
             
+            // Medium haptic for rotation
+            playHapticPattern(intensity: 0.4, sharpness: 0.7)
+            
             // Update ghost piece position
             updateGhostPiece()
         }
@@ -412,6 +467,9 @@ class TetrisGameModel: ObservableObject {
         
         if canMove(current, to: (current.position.x, current.position.y + 1)) {
             currentTetromino?.position.y += 1
+            
+            // Light haptic for movement
+            playHapticPattern(intensity: 0.3, sharpness: 0.5)
             
             // Update ghost piece position
             updateGhostPiece()
@@ -431,6 +489,9 @@ class TetrisGameModel: ObservableObject {
         // Move the tetromino to that position
         if newY != current.position.y {
             currentTetromino?.position.y = newY
+            
+            // Strong haptic for hard drop
+            playHapticPattern(intensity: 0.8, sharpness: 0.9, duration: 0.2)
             
             // Update last move down time to prevent immediate movement
             lastMoveDownTime = Date()
@@ -544,5 +605,210 @@ class TetrisGameModel: ObservableObject {
     // Get game statistics
     var gameStats: (creationDate: Date, lastPlayed: Date, playTime: TimeInterval) {
         return (creationDate, lastPlayedDate, totalPlayTime)
+    }
+    
+    // MARK: - Haptic Feedback
+    
+    private func prepareHapticEngine() {
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        
+        do {
+            hapticEngine = try CHHapticEngine()
+            try hapticEngine?.start()
+            
+            // Restart the engine if it stops
+            hapticEngine?.resetHandler = { [weak self] in
+                guard let self = self else { return }
+                
+                do {
+                    try self.hapticEngine?.start()
+                } catch {
+                    print("Failed to restart haptic engine: \(error)")
+                }
+            }
+            
+            // Handle engine stopping
+            hapticEngine?.stoppedHandler = { reason in
+                print("Haptic engine stopped: \(reason)")
+            }
+            
+        } catch {
+            print("Failed to initialize haptic engine: \(error)")
+        }
+    }
+    
+    private func playHapticPattern(intensity: Float, sharpness: Float, duration: TimeInterval = 0.1) {
+        // Only play if haptic feedback is enabled
+        guard hapticFeedbackEnabled, CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        
+        // Initialize engine if needed
+        if hapticEngine == nil {
+            prepareHapticEngine()
+        }
+        
+        // Create haptic event parameters
+        let intensityParameter = CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity)
+        let sharpnessParameter = CHHapticEventParameter(parameterID: .hapticSharpness, value: sharpness)
+        
+        // Create haptic event
+        let event = CHHapticEvent(
+            eventType: .hapticTransient,
+            parameters: [intensityParameter, sharpnessParameter],
+            relativeTime: 0,
+            duration: duration
+        )
+        
+        do {
+            // Create pattern and play it
+            let pattern = try CHHapticPattern(events: [event], parameters: [])
+            let player = try hapticEngine?.makePlayer(with: pattern)
+            try player?.start(atTime: 0)
+        } catch {
+            print("Failed to play haptic pattern: \(error)")
+        }
+    }
+    
+    private func playSuccessHaptic() {
+        guard hapticFeedbackEnabled, CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        
+        // Initialize engine if needed
+        if hapticEngine == nil {
+            prepareHapticEngine()
+        }
+        
+        // Success pattern: series of increasing intensity events
+        var events = [CHHapticEvent]()
+        
+        // First beat
+        events.append(CHHapticEvent(
+            eventType: .hapticTransient,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.5),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
+            ],
+            relativeTime: 0
+        ))
+        
+        // Second beat
+        events.append(CHHapticEvent(
+            eventType: .hapticTransient,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.8),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.8)
+            ],
+            relativeTime: 0.1
+        ))
+        
+        // Final beat
+        events.append(CHHapticEvent(
+            eventType: .hapticTransient,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 1.0)
+            ],
+            relativeTime: 0.2
+        ))
+        
+        do {
+            let pattern = try CHHapticPattern(events: events, parameters: [])
+            let player = try hapticEngine?.makePlayer(with: pattern)
+            try player?.start(atTime: 0)
+        } catch {
+            print("Failed to play success haptic pattern: \(error)")
+        }
+    }
+    
+    private func playFailureHaptic() {
+        guard hapticFeedbackEnabled, CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        
+        // Initialize engine if needed
+        if hapticEngine == nil {
+            prepareHapticEngine()
+        }
+        
+        // Failure pattern: series of decreasing intensity events
+        var events = [CHHapticEvent]()
+        
+        // First beat
+        events.append(CHHapticEvent(
+            eventType: .hapticTransient,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.7)
+            ],
+            relativeTime: 0
+        ))
+        
+        // Second beat
+        events.append(CHHapticEvent(
+            eventType: .hapticTransient,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.8),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
+            ],
+            relativeTime: 0.1
+        ))
+        
+        // Third beat
+        events.append(CHHapticEvent(
+            eventType: .hapticTransient,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.3)
+            ],
+            relativeTime: 0.2,
+            duration: 0.3
+        ))
+        
+        do {
+            let pattern = try CHHapticPattern(events: events, parameters: [])
+            let player = try hapticEngine?.makePlayer(with: pattern)
+            try player?.start(atTime: 0)
+        } catch {
+            print("Failed to play failure haptic pattern: \(error)")
+        }
+    }
+    
+    func triggerSimpleHaptic() {
+        guard hapticFeedbackEnabled, CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        
+        let hapticEvent = CHHapticEvent(
+            eventType: .hapticTransient,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.5),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
+            ],
+            relativeTime: 0
+        )
+        
+        do {
+            let pattern = try CHHapticPattern(events: [hapticEvent], parameters: [])
+            let player = try hapticEngine?.makePlayer(with: pattern)
+            try player?.start(atTime: 0)
+        } catch {
+            print("Failed to play haptic: \(error.localizedDescription)")
+        }
+    }
+    
+    func triggerCustomPattern() {
+        guard hapticFeedbackEnabled, CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        
+        do {
+            let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.7)
+            let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0)
+            
+            let event1 = CHHapticEvent(eventType: .hapticTransient, parameters: [intensity, sharpness], relativeTime: 0.0)
+            let event2 = CHHapticEvent(eventType: .hapticTransient, parameters: [intensity, sharpness], relativeTime: 0.2)
+            
+            let pattern = try CHHapticPattern(events: [event1, event2], parameters: [])
+            let player = try hapticEngine?.makePlayer(with: pattern)
+            try player?.start(atTime: 0)
+        } catch {
+            print("Failed to play custom pattern: \(error.localizedDescription)")
+        }
+    }
+    
+    func stopEngine() {
+        hapticEngine?.stop()
     }
 }
