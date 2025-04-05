@@ -24,7 +24,6 @@ struct LevelUpView: View {
                 Text("Speed: \(gameModel.gameLevel.speedPercentage)%")
                     .font(.headline)
                     .foregroundColor(speedColor())
-                    .padding(.top, 8)
             }
         }
         .padding(30)

@@ -12,17 +12,37 @@ struct GameInstructionsView: View {
         
     var body: some View {
 #if os(macOS)
-        InstructionBuilder()
+        InstructionsViewBuilder()
+            .toolbar {
+                Button("Done") {
+                    dismiss()
+                }
+            }
             .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
 #else
         NavigationView {
-            InstructionBuilder()
+            InstructionsViewBuilder()
+                .navigationTitle("Instructions")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar(content: {
+                    ToolbarItem {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Label("Dismiss", systemImage: "xmark.circle.fill")
+                        }
+                        
+                    }
+                })
         }
 #endif
     }
+}
+
+struct InstructionsViewBuilder: View {
+    @Environment(\.dismiss) var dismiss
     
-    @ViewBuilder
-    func InstructionBuilder() -> some View {
+    var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Group {
@@ -77,26 +97,6 @@ struct GameInstructionsView: View {
             }
             .padding()
         }
-        .navigationTitle("Instructions")
-#if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(content: {
-            ToolbarItem {
-                Button {
-                    dismiss()
-                } label: {
-                    Label("Dismiss", systemImage: "xmark.circle.fill")
-                }
-                
-            }
-        })
-#else
-        .toolbar {
-            Button("Done") {
-                dismiss()
-            }
-        }
-#endif
     }
 }
 

@@ -21,6 +21,7 @@ enum SortBy: String, Codable, CaseIterable {
 }
 
 struct GameSessionsListView: View {
+    var isWindow: Bool = false
     @EnvironmentObject var gameModel: TetrisGameModel
     @Environment(\.dismiss) var dismiss
     @State private var sortBy: SortBy = .startDate
@@ -74,8 +75,10 @@ struct GameSessionsListView: View {
         }.frame(maxHeight: 650)
         .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
         .toolbar {
-            Button("Done") {
-                dismiss()
+            if !isWindow {
+                Button("Done") {
+                    dismiss()
+                }
             }
         }
     }

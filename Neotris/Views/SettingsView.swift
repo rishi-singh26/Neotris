@@ -9,6 +9,7 @@ import SwiftUI
 import StoreKit
 
 struct SettingsView: View {
+    var isWindow: Bool = false
     @EnvironmentObject var gameModel: TetrisGameModel
     @Environment(\.dismiss) var dismiss
     
@@ -116,10 +117,12 @@ struct SettingsView: View {
                 }
                 .padding(.bottom)
             }
-            .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
+            .background(isWindow ? nil : VisualEffectView(material: .popover, blendingMode: .behindWindow))
             .toolbar {
-                Button("Done") {
-                    dismiss()
+                if !isWindow {
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
             }
 #else

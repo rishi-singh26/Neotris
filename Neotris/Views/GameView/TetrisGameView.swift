@@ -30,7 +30,7 @@ struct TetrisGameView: View {
                         .font(.largeTitle.bold())
                         .fontDesign(.monospaced)
                         .gesture(
-                            TapGesture(count: 5)
+                            TapGesture(count: 2)
                                 .onEnded {
                                     showAlert.toggle()
                                 }
@@ -58,7 +58,7 @@ struct TetrisGameView: View {
                         .font(.largeTitle.bold())
                         .fontDesign(.monospaced)
                         .gesture(
-                            TapGesture(count: 5)
+                            TapGesture(count: 2)
                                 .onEnded {
                                     showAlert.toggle()
                                 }
@@ -78,11 +78,16 @@ struct TetrisGameView: View {
                     .padding(.horizontal, 10)
                     
                     ControlBarView()
-                }            }
+                }
+            }
             
             // Level up animation overlay
             if gameModel.showLevelUpAnimation {
-                LevelUpView()
+                VStack {
+                    LevelUpView()
+                        .padding(.top, 65)
+                    Spacer()
+                }
             }
             
             // Game over overlay
