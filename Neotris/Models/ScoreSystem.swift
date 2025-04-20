@@ -12,7 +12,7 @@ struct ScoreSystem: Codable {
     var score: Int = 0
     var highScore: Int = 0
     
-    private static let highScoreKey = "neotrisHighScore"
+    static let highScoreKey = "neotrisHighScore"
     
     init() {
         // Load high score from UserDefaults when initialized

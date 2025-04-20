@@ -160,7 +160,7 @@ struct GamesListView: View {
     @Environment(\.modelContext) var modelContext
     @Query(sort: \TetrisGameSession.creationDate, order: .reverse) private var gameSessions: [TetrisGameSession]
     @State private var showDeleteConfirmation = false
-    @State private var selectedSessionForDeletion: TetrisGameSession?
+    @State private var selectedSessionForAction: TetrisGameSession? // game selected for any action such as delete, show detail
 
     init(sortBy: SortBy, sortOrder: Bool) {
         
@@ -178,6 +178,15 @@ struct GamesListView: View {
         }
         
         _gameSessions = Query(sort: sortDescriptors)
+        
+        // Update the hiscore
+        var highScore = UserDefaults.standard.integer(forKey: ScoreSystem.highScoreKey)
+        self.gameSessions.forEach { session in
+            if session.score > highScore {
+                highScore = session.score
+            }
+        }
+        UserDefaults.standard.set(highScore, forKey: ScoreSystem.highScoreKey)
     }
     
     var body: some View {
@@ -257,12 +266,12 @@ struct GamesListView: View {
     }
     
     func showDeleteConfirmation(session: TetrisGameSession) {
-        selectedSessionForDeletion = session
+        selectedSessionForAction = session
         showDeleteConfirmation.toggle()
     }
     
     func deleteGame() {
-        guard let session = selectedSessionForDeletion else { return }
+        guard let session = selectedSessionForAction else { return }
         withAnimation(.linear) {
             modelContext.delete(session)
         }
