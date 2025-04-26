@@ -182,11 +182,11 @@ struct TetrisGameView: View {
     private func setupKeyboardControls() {
 #if os(macOS)
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            //            Logic to resume game with "P" key
-            //            if gameModel.gameState == .paused && event.keyCode == 35 {
-            //                gameModel.resumeGame()
-            //                return nil
-            //            }
+            // Logic to resume game with "R" key
+            if gameModel.gameState == .paused && event.keyCode == 15 {
+                gameModel.resumeGame()
+                return nil
+            }
             guard gameModel.gameState == .playing else { return event }
             
             switch event.keyCode {

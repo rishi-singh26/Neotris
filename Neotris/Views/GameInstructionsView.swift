@@ -68,8 +68,10 @@ struct InstructionsViewBuilder: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("• Left/Right arrow keys: Move piece")
                         Text("• Down arrow: Hard drop")
+                        Text("• Up arrow: Rotate piece")
                         Text("• Space: Rotate piece")
                         Text("• P: Pause game")
+                        Text("• R: Resume game")
                     }
                 }
                 
