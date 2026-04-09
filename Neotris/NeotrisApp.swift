@@ -15,6 +15,9 @@ struct NeotrisApp: App {
     // Create a single shared instance of your game model
     @StateObject private var gameModel: TetrisGameModel
     
+    let gameWidth: CGFloat = 650
+    let gameHeight: CGFloat = 790
+    
     init() {
         let schema = Schema([
             TetrisGameSession.self,
@@ -47,11 +50,11 @@ struct NeotrisApp: App {
     var body: some Scene {
         WindowGroup {
             TetrisGameView()
-                .frame(minWidth: 800, maxWidth: .infinity, minHeight: 900, maxHeight: .infinity)
+                .frame(minWidth: gameWidth, maxWidth: .infinity, minHeight: gameHeight, maxHeight: .infinity)
                 .environmentObject(gameModel)
         }
         .modelContainer(sharedModelContainer)
-        .defaultSize(width: 800, height: 900)
+        .defaultSize(width: gameWidth, height: gameHeight)
         #if os(macOS)
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)

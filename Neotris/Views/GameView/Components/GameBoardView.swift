@@ -96,6 +96,13 @@ struct GameBoardView: View {
     
     // Calculate cell size based on available space
     private func cellSize() -> CGFloat {
+#if os(iOS) || os(visionOS)
+        let widthDivider = 17.47
+        let heightDivider = 38.0
+#elseif os(macOS)
+        let widthDivider = 18.47
+        let heightDivider = 39.0
+#endif
 //        print(UIService.screenWidth/17.47)
 //        print(UIService.screenHeight/38)
 //        return 23
@@ -105,8 +112,8 @@ struct GameBoardView: View {
 //            (UIScreen.main.bounds.height - 300) / CGFloat(gameModel.boardHeight)
 //        )
         return min(
-            (UIService.screenWidth / 17.47),
-            (UIService.screenHeight / 38)
+            (UIService.screenWidth / widthDivider),
+            (UIService.screenHeight / heightDivider)
         )
     }
 }

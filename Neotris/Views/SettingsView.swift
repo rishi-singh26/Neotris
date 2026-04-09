@@ -97,6 +97,10 @@ struct SettingsView: View {
                         //                        }
                         //                        .buttonStyle(PlainButtonStyle())
                         Divider().padding(.vertical, 2)
+                        Link(destination: URL(string: "https://letterbird.co/neotris")!) {
+                            CustomLabel(leadingImageName: "text.bubble", trailingImageName: "arrow.up.right", title: "Help & Support")
+                        }
+                        Divider().padding(.vertical, 2)
                         Link(destination: URL(string: "https://github.com/rishi-singh26/Neotris")!) {
                             CustomLabel(leadingImageName: "lock.open.display", trailingImageName: "arrow.up.right", title: "Open Source Code")
                         }
@@ -186,6 +190,9 @@ struct SettingsView: View {
                         //                        } label: {
                         //                            CustomLabel(leadingImageName: "checkmark.seal", trailingImageName: "chevron.up", title: "Usage License")
                         //                        }
+                        Link(destination: URL(string: "https://letterbird.co/neotris")!) {
+                            CustomLabel(leadingImageName: "text.bubble", trailingImageName: "arrow.up.right", title: "Help & Support")
+                        }
                         Link(destination: URL(string: "https://github.com/rishi-singh26/Neotris")!) {
                             CustomLabel(leadingImageName: "lock.open.display", trailingImageName: "arrow.up.right", title: "Open Source Code")
                         }
@@ -244,6 +251,7 @@ struct SettingsView: View {
         NavigationView {
             MarkdownWebView(url: url!)
                 .navigationTitle(navigationTitle)
+                .navigationBarTitleDisplayMode(.inline)
         }
             .presentationDetents([.large])
             .presentationBackground(.thinMaterial)

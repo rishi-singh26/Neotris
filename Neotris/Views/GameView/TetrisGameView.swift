@@ -23,19 +23,19 @@ struct TetrisGameView: View {
             // Background
             GameBackgroundView()
             
-            if DeviceType.current == .iPhone {
-                VStack(spacing: 10) {
-                    Text(headerText)
-                        .foregroundStyle(.white)
-                        .font(.largeTitle.bold())
-                        .fontDesign(.monospaced)
-                        .gesture(
-                            TapGesture(count: 2)
-                                .onEnded {
-                                    showAlert.toggle()
-                                }
-                        )
-                    
+            VStack(spacing: 10) {
+                Text(headerText.isEmpty ? "Neotris" : headerText)
+                    .foregroundStyle(.white)
+                    .font(.largeTitle.bold())
+                    .fontDesign(.monospaced)
+                    .gesture(
+                        TapGesture(count: 2)
+                            .onEnded {
+                                showAlert.toggle()
+                            }
+                    )
+                
+                if DeviceType.current == .iPhone {
                     ScoreBarView()
                     
                     HStack {
@@ -46,23 +46,11 @@ struct TetrisGameView: View {
                             showInstructionSheet: $showInstructionSheet,
                             showSessionSheet: $showSessionSheet
                         )
-                    }
+                    } 
                     .padding(.horizontal, 10)
                     
                     ControlBarView()
-                }
-            } else {
-                VStack(spacing: 50) {
-                    Text(headerText)
-                        .foregroundStyle(.white)
-                        .font(.largeTitle.bold())
-                        .fontDesign(.monospaced)
-                        .gesture(
-                            TapGesture(count: 2)
-                                .onEnded {
-                                    showAlert.toggle()
-                                }
-                        )
+                } else {
                     
                     HStack {
                         ScoreBarView()
