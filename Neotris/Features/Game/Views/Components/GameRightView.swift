@@ -8,36 +8,32 @@
 import SwiftUI
 
 struct GameRightView: View {
-    @EnvironmentObject var gameModel: TetrisGameModel
+    @Environment(GameViewModel.self) private var viewModel
     @Binding var showSettingsSheet: Bool
     @Binding var showInstructionSheet: Bool
     @Binding var showSessionSheet: Bool
-    
+
     var body: some View {
         VStack {
             VStack {
-                NextPieceView(tetromino: gameModel.nextTetromino)
-                NextPieceView(tetromino: gameModel.secondNextTetromino)
+                NextPieceView(tetromino: viewModel.nextTetromino)
+                NextPieceView(tetromino: viewModel.secondNextTetromino)
             }
             .padding(14)
             .background(.ultraThinMaterial)
             .cornerRadius(20)
-            
-//                        Spacer()
-            
+
             VStack {
                 ControlButton(iconName: "questionmark.circle.fill") {
-                    gameModel.pauseGame()
+                    viewModel.pauseGame()
                     showInstructionSheet = true
                 }
-                
                 ControlButton(iconName: "list.dash") {
-                    gameModel.pauseGame()
+                    viewModel.pauseGame()
                     showSessionSheet = true
                 }
-//                            Spacer()
                 ControlButton(iconName: "switch.2") {
-                    gameModel.pauseGame()
+                    viewModel.pauseGame()
                     showSettingsSheet = true
                 }
             }
@@ -54,6 +50,5 @@ struct GameRightView: View {
         showInstructionSheet: .constant(false),
         showSessionSheet: .constant(false)
     )
-//    TetrisGameView()
-        .environmentObject(TetrisGameModel.shared)
+    .environment(GameViewModel())
 }

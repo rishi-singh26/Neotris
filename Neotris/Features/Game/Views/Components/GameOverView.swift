@@ -8,22 +8,22 @@
 import SwiftUI
 
 struct GameOverView: View {
-    @EnvironmentObject var gameModel: TetrisGameModel
-    
+    @Environment(GameViewModel.self) private var viewModel
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Game Over")
-            .font(.largeTitle.bold())
-            .padding(.bottom, -1)
-            .padding(.leading, 4)
-            
+                .font(.largeTitle.bold())
+                .padding(.bottom, -1)
+                .padding(.leading, 4)
+
             HStack {
                 Spacer()
                 VStack {
                     Text("HIGH SCORE")
                         .font(.body)
                         .padding(.top, 2)
-                    Text(String(gameModel.scoreSystem.highScore))
+                    Text(String(viewModel.scoreSystem.highScore))
                         .font(.title2.bold())
                 }
                 Spacer()
@@ -31,7 +31,7 @@ struct GameOverView: View {
                     Text("SCORE")
                         .font(.body)
                         .padding(.top, 4)
-                    Text(String(gameModel.scoreSystem.score))
+                    Text(String(viewModel.scoreSystem.score))
                         .font(.title2.bold())
                 }
                 Spacer()
@@ -39,7 +39,7 @@ struct GameOverView: View {
                     Text("LEVEL")
                         .font(.body)
                         .padding(.top, 4)
-                    Text("\(gameModel.gameLevel.level)")
+                    Text("\(viewModel.gameLevel.level)")
                         .font(.title2.bold())
                 }
                 Spacer()
@@ -47,18 +47,16 @@ struct GameOverView: View {
             .padding(.vertical, 30)
             .background(.ultraThinMaterial)
             .cornerRadius(20)
-            
+
             HStack {
                 Spacer()
-                Button(action: {
-                    gameModel.resetGame()
-                }) {
-                    HStack(spacing: gameModel.gameState == .playing ? 0 : 15) {
+                Button(action: { viewModel.resetGame() }) {
+                    HStack(spacing: viewModel.gameState == .playing ? 0 : 15) {
                         Image(systemName: "plus.circle.fill")
                         Text("New Game")
                     }
                     .padding(.horizontal, 60)
-                    .frame(width: gameModel.gameState == .playing ? 65 : nil, height: 65)
+                    .frame(width: viewModel.gameState == .playing ? 65 : nil, height: 65)
                     .background(.thinMaterial)
                     .font(.title2.bold())
                     .cornerRadius(20)
@@ -75,12 +73,12 @@ struct GameOverView: View {
         .padding(8)
         .frame(maxWidth: 400)
         .transition(.scale.combined(with: .opacity))
-        .animation(.easeInOut(duration: 0.3), value: gameModel.gameState == .gameOver)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.gameState == .gameOver)
         .environment(\.colorScheme, .dark)
     }
 }
 
 #Preview {
     GameOverView()
-        .environmentObject(TetrisGameModel.shared)
+        .environment(GameViewModel())
 }

@@ -53,5 +53,5 @@ struct NextPieceView: View {
 
 #Preview {
     TetrisGameView()
-        .environmentObject(TetrisGameModel.shared)
+        .environment(GameViewModel())
 }
