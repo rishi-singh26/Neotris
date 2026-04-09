@@ -37,7 +37,7 @@ final class GameEngine {
     var ghostPiecePosition: (x: Int, y: Int)?
 
     // MARK: - Internal timing (not observed — changes every frame)
-    @ObservationIgnored private var lastMoveDownTime: Date = Date()
+    @ObservationIgnored var lastMoveDownTime: Date = Date()
 
     // MARK: - Init
 

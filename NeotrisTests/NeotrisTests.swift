@@ -5,12 +5,12 @@
 //  Created by Rishi Singh on 02/03/25.
 //
 
-import Testing
-
-struct NeotrisTests {
-
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-    }
-
-}
+// Tests are organized in domain-specific files:
+//   BlockTests.swift          — Block struct
+//   TetrominoTypeTests.swift  — TetrominoType enum
+//   TetrominoTests.swift      — Tetromino struct (rotation, absolute positions, Codable)
+//   GameLevelTests.swift      — GameLevel struct (drop speed, progression)
+//   ScoreSystemTests.swift    — ScoreSystem struct (scoring, high score, UserDefaults)
+//   GameEngineTests.swift     — GameEngine (movement, collision, line clear, game over)
+//   GameViewModelTests.swift  — GameViewModel (state transitions, settings)
+//   PersistenceServiceTests.swift — PersistenceService (save/load, SwiftData)
