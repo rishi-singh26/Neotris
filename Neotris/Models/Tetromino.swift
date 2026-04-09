@@ -53,43 +53,23 @@ struct Tetromino: Codable {
     mutating func rotate(clockwise: Bool = true) {
         // O piece doesn't rotate
         if type == .o { return }
-        
-        // For I piece, we need special handling since it doesn't have a true center
-        if type == .i {
-            let pivotIndex = 1 // Use the second block as pivot for I piece
-            let pivotX = blocks[pivotIndex].x
-            let pivotY = blocks[pivotIndex].y
-            
-            blocks = blocks.map { block in
-                let relX = block.x - pivotX
-                let relY = block.y - pivotY
-                
-                if clockwise {
-                    return Block(x: pivotX + relY, y: pivotY - relX)
-                } else {
-                    return Block(x: pivotX - relY, y: pivotY + relX)
-                }
-            }
-        } else {
-            // For other pieces, we can use the center of rotation calculation
-            // But we need to handle the math differently because we have integers
-            
-            // Find a suitable pivot point (using the first block as reference)
-            let pivotX = blocks[0].x
-            let pivotY = blocks[0].y
-            
-            blocks = blocks.map { block in
-                let relX = block.x - pivotX
-                let relY = block.y - pivotY
-                
-                if clockwise {
-                    return Block(x: pivotX + relY, y: pivotY - relX)
-                } else {
-                    return Block(x: pivotX - relY, y: pivotY + relX)
-                }
+
+        // All other pieces rotate around their defined pivot block
+        let pivot = blocks[type.pivotIndex]
+        let pivotX = pivot.x
+        let pivotY = pivot.y
+
+        blocks = blocks.map { block in
+            let relX = block.x - pivotX
+            let relY = block.y - pivotY
+
+            if clockwise {
+                return Block(x: pivotX + relY, y: pivotY - relX)
+            } else {
+                return Block(x: pivotX - relY, y: pivotY + relX)
             }
         }
-        
+
         rotation = (rotation + (clockwise ? 1 : -1) + 4) % 4
     }
 }

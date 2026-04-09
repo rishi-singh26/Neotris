@@ -337,7 +337,7 @@ class TetrisGameModel: ObservableObject {
         for y in (0..<boardHeight).reversed() {
             if gameBoard[y].allSatisfy({ $0 != nil }) {
                 // Line is complete, remove it
-                for j in (1...y).reversed() {
+                for j in stride(from: y, through: 1, by: -1) {
                     gameBoard[j] = gameBoard[j-1]
                 }
                 // Clear the top line
