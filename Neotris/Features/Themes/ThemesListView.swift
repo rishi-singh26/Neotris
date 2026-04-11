@@ -11,7 +11,7 @@ import SwiftData
 struct ThemesListView: View {
     @Environment(GameViewModel.self) private var viewModel
     @Environment(\.modelContext) private var modelContext
-    
+
     #if os(macOS)
     @State private var showAddThemeSheet: Bool = false
     #endif
@@ -60,16 +60,16 @@ struct ThemesListView: View {
         }
     }
 
+    // MARK: - Platform Containers
+
 #if os(iOS)
     @ViewBuilder
     private func IOSViewBuilder() -> some View {
         List {
-            // Built-in default row
             Section {
                 DefaultThemeRowBuilder()
             }
 
-            // User-created themes
             Section("Custom Themes") {
                 ForEach(themes) { theme in
                     ThemeRowBuilder(for: theme)
@@ -112,7 +112,7 @@ struct ThemesListView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) { // Navigation bar trailing
+            ToolbarItem(placement: .primaryAction) {
                 NavigationLink {
                     CreateThemeView(themesCount: themes.count)
                 } label: {
@@ -120,65 +120,6 @@ struct ThemesListView: View {
                 }
             }
         }
-    }
-    
-    @ViewBuilder
-    private func DefaultThemeRowBuilder() -> some View {
-        let isActive = viewModel.activeThemeSnapshot == nil
-        
-        Button {
-            viewModel.clearTheme()
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Default")
-                        .fontWeight(.medium)
-                    Text("Built-in colors")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                themeColorDots(colors: GameTheme.defaultTetrominoHexColors.prefix(4).map { Color(hex: $0) })
-
-                if isActive {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(Color.accentColor)
-                }
-            }
-            .padding(.vertical, 4)
-        }
-        .buttonStyle(.plain)
-    }
-
-    @ViewBuilder
-    private func ThemeRowBuilder(for theme: GameTheme) -> some View {
-        let isActive = viewModel.activeThemeSnapshot?.themeID == theme.id.uuidString
-        Button {
-            viewModel.applyTheme(theme)
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(theme.name)
-                        .fontWeight(.medium)
-                    Text(theme.creationDate.formatted(date: .abbreviated, time: .omitted))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                themeColorDots(colors: theme.tetrominoColors.prefix(4).map { Color(hex: $0) })
-
-                if isActive {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(Color.accentColor)
-                }
-            }
-            .padding(.vertical, 4)
-        }
-        .buttonStyle(.plain)
     }
 #endif
 
@@ -243,83 +184,100 @@ struct ThemesListView: View {
             CreateThemeView(themesCount: themes.count)
         }
     }
-    
+#endif
+
+    // MARK: - Shared Row Builders
+
     @ViewBuilder
     private func DefaultThemeRowBuilder() -> some View {
-        let isActive = viewModel.activeThemeSnapshot == nil
-        
-        HStack {
-            HStack {
-                Button {
-                    viewModel.clearTheme()
-                } label: {
-                    Image(systemName: isActive ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(isActive ? .blue : .primary)
-                }
-                .buttonStyle(.plain)
-                .disabled(isActive)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Default")
-                        .fontWeight(.medium)
-                        .foregroundStyle(isActive ? .accent : Color.primary)
-                    Text("Built-in colors")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            themeColorDots(colors: GameTheme.defaultTetrominoHexColors.prefix(4).map { Color(hex: $0) })
-        }
+        ThemeRowView(
+            title: "Default",
+            subtitle: "Built-in colors",
+            colors: GameTheme.defaultTetrominoHexColors.prefix(4).map { Color(hex: $0) },
+            isActive: viewModel.activeThemeSnapshot == nil,
+            onSelect: { viewModel.clearTheme() }
+        )
     }
 
     @ViewBuilder
     private func ThemeRowBuilder(for theme: GameTheme) -> some View {
-        let isActive = viewModel.activeThemeSnapshot?.themeID == theme.id.uuidString
-        
+        ThemeRowView(
+            title: theme.name,
+            subtitle: theme.creationDate.formatted(date: .abbreviated, time: .omitted),
+            colors: theme.tetrominoColors.prefix(4).map { Color(hex: $0) },
+            isActive: viewModel.activeThemeSnapshot?.themeID == theme.id.uuidString,
+            onSelect: { viewModel.applyTheme(theme) },
+            onEdit: { themeToEdit = theme },
+            onDelete: { themeToDelete = theme }
+        )
+    }
+
+    /// Unified row view for both the default and custom theme rows.
+    /// Platform layout differences (radio button vs tap-anywhere on iOS, ellipsis menu on macOS) are handled internally.
+    @ViewBuilder
+    private func ThemeRowView(
+        title: String,
+        subtitle: String,
+        colors: [Color],
+        isActive: Bool,
+        onSelect: @escaping () -> Void,
+        onEdit: (() -> Void)? = nil,
+        onDelete: (() -> Void)? = nil
+    ) -> some View {
+#if os(iOS)
+        Button(action: onSelect) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).fontWeight(.medium)
+                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                themeColorDots(colors: colors)
+                if isActive {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+        .buttonStyle(.plain)
+#else
         HStack {
             HStack {
-                Button {
-                    viewModel.applyTheme(theme)
-                } label: {
+                Button(action: onSelect) {
                     Image(systemName: isActive ? "checkmark.circle.fill" : "circle")
                         .foregroundStyle(isActive ? .blue : .primary)
                 }
                 .buttonStyle(.plain)
                 .disabled(isActive)
-                
+
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(theme.name)
+                    Text(title)
                         .fontWeight(.medium)
                         .foregroundStyle(isActive ? .accent : Color.primary)
-                    Text(theme.creationDate.formatted(date: .abbreviated, time: .omitted))
+                    Text(subtitle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
-            
             Spacer()
-            
-            themeColorDots(colors: theme.tetrominoColors.prefix(4).map { Color(hex: $0) })
-            
-            Menu {
-                Button("Edit", systemImage: "slider.horizontal.3") {
-                    themeToEdit = theme
+            themeColorDots(colors: colors)
+            if let onEdit, let onDelete {
+                Menu {
+                    Button("Edit", systemImage: "slider.horizontal.3") { onEdit() }
+                    Divider()
+                    Button("Delete", systemImage: "trash", role: .destructive) { onDelete() }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
-                Divider()
-                Button("Delete", systemImage: "trash", role: .destructive) {
-                    themeToDelete = theme
-                }
-            } label: {
-                Image(systemName: "ellipsis.circle")
+                .menuStyle(.borderlessButton)
             }
-            .menuStyle(.borderlessButton)
         }
-    }
 #endif
-    
+    }
+
+    // MARK: - Helpers
+
     /// Renders up to 4 small color circles as a quick visual preview.
     private func themeColorDots(colors: [Color]) -> some View {
         HStack(spacing: -4) {
@@ -333,10 +291,7 @@ struct ThemesListView: View {
         .padding(.trailing, 6)
     }
 
-    // MARK: - Helpers
-
     private func deleteTheme(_ theme: GameTheme) {
-        // If deleting the active theme, revert to default
         if viewModel.activeThemeSnapshot?.themeID == theme.id.uuidString {
             viewModel.clearTheme()
         }
