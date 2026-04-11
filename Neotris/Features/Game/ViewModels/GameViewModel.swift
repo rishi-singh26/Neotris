@@ -115,6 +115,12 @@ final class GameViewModel {
 
     // MARK: - Game Lifecycle
 
+    func prepareHapticsIfEnabled() {
+        if hapticFeedbackEnabled {
+            hapticService.prepare()
+        }
+    }
+
     func startGame() {
         guard gameState != .playing else { return }
         withAnimation { gameState = .playing }

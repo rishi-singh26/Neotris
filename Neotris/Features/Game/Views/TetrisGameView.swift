@@ -127,7 +127,10 @@ struct TetrisGameView: View {
             .animation(.easeInOut(duration: 0.3), value: viewModel.gameState == .gameOver)
         } background: {}
 #endif
-        .onAppear { setupKeyboardControls() }
+        .onAppear {
+            setupKeyboardControls()
+            viewModel.prepareHapticsIfEnabled()
+        }
         .environment(\.colorScheme, getColorScheme())
     }
 
