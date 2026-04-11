@@ -15,22 +15,48 @@ struct CreateThemeView: View {
 
     // MARK: - State
 
-    @State private var themeName: String = ""
-    @State private var tetrominoColors: [Color] = GameTheme.defaultTetrominoHexColors.map { Color(hex: $0) }
+    @State private var themeName: String
+    @State private var tetrominoColors: [Color]
     @State private var selectedTetrominoIndex: Int = 0
     @State private var showingBackground: Bool = false
 
     // Mesh gradient state
-    @State private var meshWidth: Int = 3
-    @State private var meshHeight: Int = 4
-    @State private var meshColors: [Color] = GameTheme.defaultMeshHexColors.map { Color(hex: $0) }
-    @State private var meshPointsX: [Double] = GameTheme.defaultMeshPointsX
-    @State private var meshPointsY: [Double] = GameTheme.defaultMeshPointsY
+    @State private var meshWidth: Int
+    @State private var meshHeight: Int
+    @State private var meshColors: [Color]
+    @State private var meshPointsX: [Double]
+    @State private var meshPointsY: [Double]
 
     // iPhone-only: sheet for background editor
     @State private var showingBackgroundSheet: Bool = false
-    
+
     var themesCount: Int
+    var existingTheme: GameTheme?
+
+    private var isEditing: Bool { existingTheme != nil }
+
+    init(themesCount: Int, existingTheme: GameTheme? = nil) {
+        self.themesCount = themesCount
+        self.existingTheme = existingTheme
+
+        if let theme = existingTheme {
+            _themeName       = State(initialValue: theme.name)
+            _tetrominoColors = State(initialValue: theme.tetrominoColors.map { Color(hex: $0) })
+            _meshWidth       = State(initialValue: theme.meshWidth)
+            _meshHeight      = State(initialValue: theme.meshHeight)
+            _meshColors      = State(initialValue: theme.meshColors.map { Color(hex: $0) })
+            _meshPointsX     = State(initialValue: theme.meshPointsX)
+            _meshPointsY     = State(initialValue: theme.meshPointsY)
+        } else {
+            _themeName       = State(initialValue: "")
+            _tetrominoColors = State(initialValue: GameTheme.defaultTetrominoHexColors.map { Color(hex: $0) })
+            _meshWidth       = State(initialValue: 3)
+            _meshHeight      = State(initialValue: 4)
+            _meshColors      = State(initialValue: GameTheme.defaultMeshHexColors.map { Color(hex: $0) })
+            _meshPointsX     = State(initialValue: GameTheme.defaultMeshPointsX)
+            _meshPointsY     = State(initialValue: GameTheme.defaultMeshPointsY)
+        }
+    }
 
     var body: some View {
         Group {
@@ -41,7 +67,7 @@ struct CreateThemeView: View {
 #endif
         }
 #if os(iOS)
-        .navigationTitle("Create Theme")
+        .navigationTitle(isEditing ? "Edit Theme" : "Create Theme")
         .navigationBarTitleDisplayMode(.inline)
 #endif
         .toolbar {
@@ -52,7 +78,7 @@ struct CreateThemeView: View {
 #if os(iOS)
                     Image(systemName: "checkmark")
 #else
-                    Label("Create", systemImage: "checkmark")
+                    Label(isEditing ? "Save" : "Create", systemImage: "checkmark")
 #endif
                 }
                     .fontWeight(.semibold)
@@ -146,16 +172,32 @@ struct CreateThemeView: View {
 
     // MARK: - Save
     private func saveTheme() {
-        let name = themeName.isEmpty ? "Theme \(themesCount + 1)" : themeName
-        let theme = GameTheme(name: name, themeIndex: themesCount)
-        theme.tetrominoColors = tetrominoColors.map { $0.toHexString() }
-        theme.meshWidth = meshWidth
-        theme.meshHeight = meshHeight
-        theme.meshColors = meshColors.map { $0.toHexString() }
-        theme.meshPointsX = meshPointsX
-        theme.meshPointsY = meshPointsY
-        modelContext.insert(theme)
-        viewModel.applyTheme(theme)
+        if let theme = existingTheme {
+            // Edit mode — mutate the SwiftData object directly (auto-persisted)
+            theme.name            = themeName.isEmpty ? theme.name : themeName
+            theme.tetrominoColors = tetrominoColors.map { $0.toHexString() }
+            theme.meshWidth       = meshWidth
+            theme.meshHeight      = meshHeight
+            theme.meshColors      = meshColors.map { $0.toHexString() }
+            theme.meshPointsX     = meshPointsX
+            theme.meshPointsY     = meshPointsY
+            // Refresh active snapshot if this was the active theme
+            if viewModel.activeThemeSnapshot?.themeID == theme.id.uuidString {
+                viewModel.applyTheme(theme)
+            }
+        } else {
+            // Create mode — existing logic
+            let name = themeName.isEmpty ? "Theme \(themesCount + 1)" : themeName
+            let theme = GameTheme(name: name, themeIndex: themesCount)
+            theme.tetrominoColors = tetrominoColors.map { $0.toHexString() }
+            theme.meshWidth       = meshWidth
+            theme.meshHeight      = meshHeight
+            theme.meshColors      = meshColors.map { $0.toHexString() }
+            theme.meshPointsX     = meshPointsX
+            theme.meshPointsY     = meshPointsY
+            modelContext.insert(theme)
+            viewModel.applyTheme(theme)
+        }
         dismiss()
     }
 }

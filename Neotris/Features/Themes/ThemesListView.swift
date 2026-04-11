@@ -15,6 +15,8 @@ struct ThemesListView: View {
     #if os(macOS)
     @State private var showAddThemeSheet: Bool = false
     #endif
+    @State private var themeToEdit: GameTheme? = nil
+    @State private var themeToDelete: GameTheme? = nil
 
     @Query(sort: \GameTheme.creationDate) private var themes: [GameTheme]
 
@@ -27,6 +29,35 @@ struct ThemesListView: View {
 #endif
         }
         .navigationTitle("Game Themes")
+        .confirmationDialog(
+            "Delete \"\(themeToDelete?.name ?? "Theme")\"?",
+            isPresented: Binding(
+                get: { themeToDelete != nil },
+                set: { if !$0 { themeToDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let theme = themeToDelete {
+                    deleteTheme(theme)
+                    themeToDelete = nil
+                }
+            }
+            Button("Cancel", role: .cancel) {
+                themeToDelete = nil
+            }
+        } message: {
+            Text("This action cannot be undone.")
+        }
+        .sheet(item: $themeToEdit) { theme in
+#if os(iOS)
+            NavigationStack {
+                CreateThemeView(themesCount: themes.count, existingTheme: theme)
+            }
+#else
+            CreateThemeView(themesCount: themes.count, existingTheme: theme)
+#endif
+        }
     }
 
 #if os(iOS)
@@ -42,16 +73,30 @@ struct ThemesListView: View {
             Section("Custom Themes") {
                 ForEach(themes) { theme in
                     ThemeRowBuilder(for: theme)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                themeToEdit = theme
+                            } label: {
+                                Label("Edit", systemImage: "slider.horizontal.3")
+                            }
+                            .tint(.blue)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
-                                deleteTheme(theme)
+                                themeToDelete = theme
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
                         .contextMenu {
+                            Button {
+                                themeToEdit = theme
+                            } label: {
+                                Label("Edit", systemImage: "slider.horizontal.3")
+                            }
+                            Divider()
                             Button(role: .destructive) {
-                                deleteTheme(theme)
+                                themeToDelete = theme
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
@@ -150,8 +195,14 @@ struct ThemesListView: View {
                     ForEach(themes) { theme in
                         ThemeRowBuilder(for: theme)
                             .contextMenu {
+                                Button {
+                                    themeToEdit = theme
+                                } label: {
+                                    Label("Edit Theme", systemImage: "slider.horizontal.3")
+                                }
+                                Divider()
                                 Button(role: .destructive) {
-                                    deleteTheme(theme)
+                                    themeToDelete = theme
                                 } label: {
                                     Label("Delete Theme", systemImage: "trash")
                                 }
@@ -254,12 +305,12 @@ struct ThemesListView: View {
             themeColorDots(colors: theme.tetrominoColors.prefix(4).map { Color(hex: $0) })
             
             Menu {
-                Button("Edit", systemImage: "slider.horizontal.2.square") {
-                    deleteTheme(theme)
+                Button("Edit", systemImage: "slider.horizontal.3") {
+                    themeToEdit = theme
                 }
                 Divider()
                 Button("Delete", systemImage: "trash", role: .destructive) {
-                    deleteTheme(theme)
+                    themeToDelete = theme
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")
