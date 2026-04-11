@@ -5,7 +5,7 @@
 //  Created by Rishi Singh on 09/04/25.
 //
 
-import SwiftUI
+import Foundation
 import Observation
 
 // MARK: - GameTickResult
@@ -28,7 +28,8 @@ final class GameEngine {
     let boardHeight = 20
 
     // MARK: - Observable State
-    var gameBoard: [[Color?]]
+    /// Each cell stores the TetrominoType of the locked piece, or nil if empty.
+    var gameBoard: [[TetrominoType?]]
     var currentTetromino: Tetromino?
     var nextTetromino: Tetromino?
     var secondNextTetromino: Tetromino?
@@ -65,7 +66,7 @@ final class GameEngine {
 
         for y in 0..<height {
             for x in 0..<width {
-                self.gameBoard[y][x] = color(from: savedState.gameBoard[y][x])
+                self.gameBoard[y][x] = Self.tetrominoType(from: savedState.gameBoard[y][x])
             }
         }
 
@@ -198,7 +199,7 @@ final class GameEngine {
         guard let current = currentTetromino else { return }
         for block in current.absoluteBlockPositions() {
             if block.y >= 0 && block.y < boardHeight && block.x >= 0 && block.x < boardWidth {
-                gameBoard[block.y][block.x] = current.type.color
+                gameBoard[block.y][block.x] = current.type
             }
         }
     }
@@ -254,17 +255,24 @@ final class GameEngine {
         gameBoard[0].contains(where: { $0 != nil })
     }
 
-    // MARK: - Color helpers (for save/restore)
+    // MARK: - Save/restore helpers
 
-    private func color(from name: String?) -> Color? {
+    /// Converts a stored board cell string to a TetrominoType.
+    /// Handles both new format (rawValue: "i", "o", etc.) and
+    /// old format (color names: "cyan", "yellow", etc.) for backward compatibility.
+    static func tetrominoType(from name: String?) -> TetrominoType? {
+        guard let name else { return nil }
+        // Try new format first (rawValue)
+        if let type = TetrominoType(rawValue: name) { return type }
+        // Fall back to old color-name format
         switch name {
-        case "cyan":   return .cyan
-        case "yellow": return .yellow
-        case "purple": return .purple
-        case "blue":   return .blue
-        case "orange": return .orange
-        case "green":  return .green
-        case "red":    return .red
+        case "cyan":   return .i
+        case "yellow": return .o
+        case "purple": return .t
+        case "blue":   return .j
+        case "orange": return .l
+        case "green":  return .s
+        case "red":    return .z
         default:       return nil
         }
     }

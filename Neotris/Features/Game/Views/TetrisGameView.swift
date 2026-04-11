@@ -90,20 +90,14 @@ struct TetrisGameView: View {
         .sheet(isPresented: $showSettingSheet) {
             SettingsView()
                 .presentationDetents(DeviceType.current == .iPhone ? [.medium, .large] : [.large])
-                .presentationBackground(.thinMaterial)
-                .presentationCornerRadius(25)
         }
         .sheet(isPresented: $showInstructionSheet) {
             GameInstructionsView()
                 .presentationDetents(DeviceType.current == .iPhone ? [.medium, .large] : [.large])
-                .presentationBackground(.thinMaterial)
-                .presentationCornerRadius(25)
         }
         .sheet(isPresented: $showSessionSheet) {
             GameSessionsListView()
                 .presentationDetents(DeviceType.current == .iPhone ? [.medium, .large] : [.large])
-                .presentationBackground(.thinMaterial)
-                .presentationCornerRadius(25)
         }
 #if os(macOS)
         .alert("Header Text", isPresented: $showAlert) {

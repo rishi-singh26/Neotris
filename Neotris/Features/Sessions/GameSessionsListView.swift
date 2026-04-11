@@ -19,9 +19,9 @@ enum SortBy: String, Codable, CaseIterable {
 }
 
 struct GameSessionsListView: View {
-    var isWindow: Bool = false
     @Environment(GameViewModel.self) private var viewModel
     @Environment(\.dismiss) var dismiss
+
     @State private var sortBy: SortBy = .startDate
     @State private var sortOrder: Bool = false
 
@@ -44,9 +44,8 @@ struct GameSessionsListView: View {
                     .font(.largeTitle)
                 Spacer()
                 GameSortView()
-                    .frame(maxWidth: 150)
             }
-            .padding([.horizontal, .top], 30)
+            .padding([.horizontal, .top])
             ScrollView {
                 MacCustomSection(header: "Current Game") {
                     CustomLabel(trailingText: String(viewModel.scoreSystem.score), title: "Score")
@@ -72,12 +71,7 @@ struct GameSessionsListView: View {
             }
         }
         .frame(maxHeight: 650)
-        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
-        .toolbar {
-            if !isWindow {
-                Button("Done") { dismiss() }
-            }
-        }
+        // .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
     }
 #endif
 
@@ -114,7 +108,7 @@ struct GameSessionsListView: View {
         .toolbar {
             ToolbarItem {
                 Button { dismiss() } label: {
-                    Label("Dismiss", systemImage: "xmark.circle.fill")
+                    Label("Dismiss", systemImage: "xmark")
                 }
             }
         }

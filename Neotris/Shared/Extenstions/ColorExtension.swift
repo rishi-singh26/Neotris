@@ -41,6 +41,27 @@ extension Color {
     func withGhostOpacity() -> Color {
         return self.opacity(0.3)
     }
+
+    /// Convert a Color to a 6-digit uppercase hex string (RGB, no alpha)
+    func toHexString() -> String {
+#if os(iOS)
+        let ui = UIColor(self)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        ui.getRed(&r, green: &g, blue: &b, alpha: &a)
+#elseif os(macOS)
+        let ns = NSColor(self)
+        guard let rgb = ns.usingColorSpace(.sRGB) else { return "808080" }
+        let r = rgb.redComponent
+        let g = rgb.greenComponent
+        let b = rgb.blueComponent
+#endif
+        return String(
+            format: "%02X%02X%02X",
+            Int((r * 255).rounded()),
+            Int((g * 255).rounded()),
+            Int((b * 255).rounded())
+        )
+    }
 }
 
 // Extension to the Color class to calculate foreground color based on background color luminance

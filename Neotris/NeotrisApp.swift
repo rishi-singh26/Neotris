@@ -18,11 +18,11 @@ struct NeotrisApp: App {
     let gameHeight: CGFloat = 790
 
     init() {
-        let schema = Schema([TetrisGameSession.self])
+        let schema = Schema([TetrisGameSession.self, GameTheme.self])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let container = try ModelContainer(for: schema, migrationPlan: NeotrisSchemaMigrationPlan.self, configurations: [modelConfiguration])
             sharedModelContainer = container
 
             if let savedState = PersistenceService.loadSavedGameState() {
@@ -46,15 +46,6 @@ struct NeotrisApp: App {
 #if os(macOS)
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
-        .commands {
-            SidebarCommands()
-            CommandMenu("Game") {
-                Button("How to play") {
-                    openWindow(id: "howtoplay")
-                }
-                .keyboardShortcut("G", modifiers: [.command])
-            }
-        }
 #endif
 
 #if os(macOS)
@@ -62,15 +53,28 @@ struct NeotrisApp: App {
             InstructionsViewBuilder()
                 .frame(minWidth: 400, maxWidth: 500, minHeight: 400, maxHeight: 600)
         }
+        .modelContainer(sharedModelContainer)
+        .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 400, height: 400)
+        .windowResizability(.contentSize)
+        
+        Window("Game Sessions", id: "gamesessions") {
+            GameSessionsListView()
+                .environment(viewModel)
+                .frame(minWidth: 400, maxWidth: 500, minHeight: 400, maxHeight: 600)
+        }
+        .modelContainer(sharedModelContainer)
+        .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 400, height: 400)
         .windowResizability(.contentSize)
 
         Settings {
-            SettingsView(isWindow: true)
+            SettingsView()
                 .environment(viewModel)
         }
-        .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 500, height: 500)
+        .defaultSize(width: 700, height: 400)
+        .windowResizability(.contentSize)
+        .modelContainer(sharedModelContainer)
 #endif
     }
 }

@@ -29,15 +29,15 @@ struct GameBoardView: View {
     private func cellView(x: Int, y: Int) -> some View {
         let ghostBlocks = viewModel.ghostPieceAbsolutePositions()
 
-        if let color = viewModel.gameBoard[y][x] {
-            CellBuilder(color: color)
+        if let type = viewModel.gameBoard[y][x] {
+            CellBuilder(color: viewModel.tetrominoColor(for: type))
         } else if let current = viewModel.currentTetromino,
                   current.absoluteBlockPositions().contains(where: { $0.x == x && $0.y == y }) {
-            CellBuilder(color: current.type.color)
+            CellBuilder(color: viewModel.tetrominoColor(for: current.type))
         } else if viewModel.ghostBlocksEnabled,
                   ghostBlocks.contains(where: { $0.x == x && $0.y == y }),
                   let current = viewModel.currentTetromino {
-            CellBuilder(color: current.type.color.opacity(0.4))
+            CellBuilder(color: viewModel.tetrominoColor(for: current.type).opacity(0.4))
         } else {
             CellBuilder(color: .black.opacity(0.2))
         }

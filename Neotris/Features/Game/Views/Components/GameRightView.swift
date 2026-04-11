@@ -9,6 +9,11 @@ import SwiftUI
 
 struct GameRightView: View {
     @Environment(GameViewModel.self) private var viewModel
+    #if os(macOS)
+    @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
+    #endif
+    
     @Binding var showSettingsSheet: Bool
     @Binding var showInstructionSheet: Bool
     @Binding var showSessionSheet: Bool
@@ -26,15 +31,27 @@ struct GameRightView: View {
             VStack {
                 ControlButton(iconName: "questionmark.circle.fill") {
                     viewModel.pauseGame()
+                    #if os(macOS)
+                    openWindow(id: "howtoplay")
+                    #else
                     showInstructionSheet = true
+                    #endif
                 }
                 ControlButton(iconName: "list.dash") {
                     viewModel.pauseGame()
+                    #if os(macOS)
+                    openWindow(id: "gamesessions")
+                    #else
                     showSessionSheet = true
+                    #endif
                 }
                 ControlButton(iconName: "switch.2") {
                     viewModel.pauseGame()
+                    #if os(macOS)
+                    openSettings()
+                    #else
                     showSettingsSheet = true
+                    #endif
                 }
             }
             .padding(14)

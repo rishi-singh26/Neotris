@@ -38,9 +38,12 @@ final class GameViewModel {
         didSet { UserDefaults.standard.set(gameSoundEnabled, forKey: "gameSoundEnabled") }
     }
 
+    // MARK: - Active Game Theme
+    var activeThemeSnapshot: ActiveThemeSnapshot?
+
     // MARK: - Engine State Proxies
     // Views access these; observation chains through the @Observable GameEngine automatically.
-    var gameBoard: [[Color?]] { engine.gameBoard }
+    var gameBoard: [[TetrominoType?]] { engine.gameBoard }
     var currentTetromino: Tetromino? { engine.currentTetromino }
     var nextTetromino: Tetromino? { engine.nextTetromino }
     var secondNextTetromino: Tetromino? { engine.secondNextTetromino }
@@ -77,6 +80,7 @@ final class GameViewModel {
         self.ghostBlocksEnabled = UserDefaults.standard.bool(forKey: "ghostBlocksEnabled")
         self.gameTheme = UserDefaults.standard.integer(forKey: "gameTheme")
         self.gameSoundEnabled = UserDefaults.standard.bool(forKey: "gameSoundEnabled")
+        self.activeThemeSnapshot = Self.loadThemeSnapshot()
 
         if self.hapticFeedbackEnabled {
             self.hapticService.prepare()
@@ -97,6 +101,7 @@ final class GameViewModel {
         self.ghostBlocksEnabled = UserDefaults.standard.bool(forKey: "ghostBlocksEnabled")
         self.gameTheme = UserDefaults.standard.integer(forKey: "gameTheme")
         self.gameSoundEnabled = UserDefaults.standard.bool(forKey: "gameSoundEnabled")
+        self.activeThemeSnapshot = Self.loadThemeSnapshot()
 
         self.creationDate = savedState.creationDate
         self.lastPlayedDate = savedState.lastPlayedDate
@@ -268,5 +273,32 @@ final class GameViewModel {
             lastPlayedDate: Date(),
             totalPlayTime: totalPlayTime
         )
+    }
+
+    // MARK: - Theme Management
+
+    /// Applies a GameTheme: stores a snapshot in UserDefaults and updates the published property.
+    func applyTheme(_ theme: GameTheme) {
+        let snapshot = ActiveThemeSnapshot(from: theme)
+        activeThemeSnapshot = snapshot
+        if let data = try? JSONEncoder().encode(snapshot) {
+            UserDefaults.standard.set(data, forKey: "activeGameTheme")
+        }
+    }
+
+    /// Clears the active theme, reverting to built-in defaults.
+    func clearTheme() {
+        activeThemeSnapshot = nil
+        UserDefaults.standard.removeObject(forKey: "activeGameTheme")
+    }
+
+    /// Returns the correct color for a tetromino type respecting the active theme.
+    func tetrominoColor(for type: TetrominoType) -> Color {
+        activeThemeSnapshot?.tetrominoColor(for: type) ?? type.color
+    }
+
+    private static func loadThemeSnapshot() -> ActiveThemeSnapshot? {
+        guard let data = UserDefaults.standard.data(forKey: "activeGameTheme") else { return nil }
+        return try? JSONDecoder().decode(ActiveThemeSnapshot.self, from: data)
     }
 }

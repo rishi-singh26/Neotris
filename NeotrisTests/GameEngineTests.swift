@@ -98,7 +98,7 @@ struct GameEngineTests {
         let engine = GameEngine()
         engine.currentTetromino = Tetromino(type: .i, startPosition: (x: 4, y: 5))
         // Block at (3,5) — directly left of I piece
-        engine.gameBoard[5][3] = .red
+        engine.gameBoard[5][3] = .z
         let result = engine.moveLeft()
         #expect(result == false)
         #expect(engine.currentTetromino?.position.x == 4)
@@ -137,7 +137,7 @@ struct GameEngineTests {
         let engine = GameEngine()
         engine.currentTetromino = Tetromino(type: .i, startPosition: (x: 2, y: 5))
         // I piece occupies (2,5)..(5,5). Place block at (6,5).
-        engine.gameBoard[5][6] = .red
+        engine.gameBoard[5][6] = .z
         #expect(engine.moveRight() == false)
     }
 
@@ -174,8 +174,8 @@ struct GameEngineTests {
         let engine = GameEngine()
         engine.currentTetromino = Tetromino(type: .o, startPosition: (x: 4, y: 5))
         // O piece: (4,5),(5,5),(4,6),(5,6). Block directly below at (4,7) and (5,7).
-        engine.gameBoard[7][4] = .red
-        engine.gameBoard[7][5] = .red
+        engine.gameBoard[7][4] = .z
+        engine.gameBoard[7][5] = .z
         #expect(engine.moveDown() == false)
     }
 
@@ -222,7 +222,7 @@ struct GameEngineTests {
         let engine = GameEngine()
         // T piece at (4,5). After CW rotation: block at absolute (5,4).
         engine.currentTetromino = Tetromino(type: .t, startPosition: (x: 4, y: 5))
-        engine.gameBoard[4][5] = .red
+        engine.gameBoard[4][5] = .z
         #expect(engine.rotate() == false)
     }
 
@@ -250,8 +250,8 @@ struct GameEngineTests {
         let engine = GameEngine()
         engine.currentTetromino = Tetromino(type: .o, startPosition: (x: 4, y: 0))
         // Block the O piece at y=15 (occupies (4,15),(5,15))
-        engine.gameBoard[15][4] = .red
-        engine.gameBoard[15][5] = .red
+        engine.gameBoard[15][4] = .z
+        engine.gameBoard[15][5] = .z
         engine.hardDrop()
         // O piece lands at y=13 (occupies rows 13,14; row 15 is blocked)
         #expect(engine.currentTetromino?.position.y == 13)
@@ -314,13 +314,7 @@ struct GameEngineTests {
     @Test func ghostPieceAbsolutePositionsEmptyWithoutPiece() {
         let engine = GameEngine()
         engine.currentTetromino = nil
-        // Without updating ghost internally, ghostPiecePosition may still be set
-        // We can test ghostPieceAbsolutePositions which checks both
-        // (it returns [] if currentTetromino or ghostPiecePosition is nil)
-        engine.currentTetromino = nil
-        // Force ghost update via hardDrop (which returns early when nil)
         engine.hardDrop() // no-op
-        // ghostPieceAbsolutePositions() returns [] when currentTetromino is nil
         let positions = engine.ghostPieceAbsolutePositions()
         #expect(positions.isEmpty)
     }
@@ -358,11 +352,11 @@ struct GameEngineTests {
         engine.currentTetromino = Tetromino(type: .o, startPosition: (x: 4, y: 18))
         engine.lastMoveDownTime = .distantPast
         _ = engine.tick()
-        // O piece placed at (4,18): board[18][4], [18][5], [19][4], [19][5] should be yellow
-        #expect(engine.gameBoard[18][4] == .yellow)
-        #expect(engine.gameBoard[18][5] == .yellow)
-        #expect(engine.gameBoard[19][4] == .yellow)
-        #expect(engine.gameBoard[19][5] == .yellow)
+        // O piece placed at (4,18): board cells should store .o (O-piece type)
+        #expect(engine.gameBoard[18][4] == .o)
+        #expect(engine.gameBoard[18][5] == .o)
+        #expect(engine.gameBoard[19][4] == .o)
+        #expect(engine.gameBoard[19][5] == .o)
     }
 
     @Test func tickClearsOneCompletedLine() {
@@ -370,9 +364,9 @@ struct GameEngineTests {
         // I piece at (0,18): absolute blocks (0,18),(1,18),(2,18),(3,18)
         engine.currentTetromino = Tetromino(type: .i, startPosition: (x: 0, y: 18))
         // Fill rest of row 18: (4..9)
-        for x in 4..<10 { engine.gameBoard[18][x] = .red }
+        for x in 4..<10 { engine.gameBoard[18][x] = .z }
         // Block downward movement: fill (0..3) of row 19
-        for x in 0..<4 { engine.gameBoard[19][x] = .red }
+        for x in 0..<4 { engine.gameBoard[19][x] = .z }
         engine.lastMoveDownTime = .distantPast
 
         let result = engine.tick()
@@ -385,8 +379,8 @@ struct GameEngineTests {
     @Test func tickScoreIncreasesAfterLineClear() {
         let engine = GameEngine()
         engine.currentTetromino = Tetromino(type: .i, startPosition: (x: 0, y: 18))
-        for x in 4..<10 { engine.gameBoard[18][x] = .red }
-        for x in 0..<4 { engine.gameBoard[19][x] = .red }
+        for x in 4..<10 { engine.gameBoard[18][x] = .z }
+        for x in 0..<4 { engine.gameBoard[19][x] = .z }
         engine.lastMoveDownTime = .distantPast
 
         _ = engine.tick()
@@ -398,24 +392,24 @@ struct GameEngineTests {
     @Test func tickRowShiftsDownAfterLineClear() {
         let engine = GameEngine()
         // Place a marker block in row 17 (above the line to be cleared)
-        engine.gameBoard[17][9] = .purple
+        engine.gameBoard[17][9] = .t
         engine.currentTetromino = Tetromino(type: .i, startPosition: (x: 0, y: 18))
-        for x in 4..<10 { engine.gameBoard[18][x] = .red }
-        for x in 0..<4 { engine.gameBoard[19][x] = .red }
+        for x in 4..<10 { engine.gameBoard[18][x] = .z }
+        for x in 0..<4 { engine.gameBoard[19][x] = .z }
         engine.lastMoveDownTime = .distantPast
 
         _ = engine.tick()
 
         // Row 17 should have shifted down to row 18
-        #expect(engine.gameBoard[18][9] == .purple)
+        #expect(engine.gameBoard[18][9] == .t)
     }
 
     @Test func tickDetectsGameOver() {
         let engine = GameEngine()
         // Partially fill row 0 — enough to trigger isGameOver() but NOT a complete line,
         // so checkForCompletedLines() won't clear it before isGameOver() is evaluated.
-        engine.gameBoard[0][0] = .red
-        engine.gameBoard[0][1] = .red
+        engine.gameBoard[0][0] = .z
+        engine.gameBoard[0][1] = .z
         engine.currentTetromino = Tetromino(type: .o, startPosition: (x: 4, y: 18))
         engine.lastMoveDownTime = .distantPast
 
@@ -441,8 +435,8 @@ struct GameEngineTests {
 
     @Test func resetClearsAllBoardCells() {
         let engine = GameEngine()
-        engine.gameBoard[10][5] = .red
-        engine.gameBoard[19][9] = .cyan
+        engine.gameBoard[10][5] = .z
+        engine.gameBoard[19][9] = .i
         engine.reset()
         let allNil = engine.gameBoard.allSatisfy { $0.allSatisfy { $0 == nil } }
         #expect(allNil)
@@ -479,16 +473,16 @@ struct GameEngineTests {
 
     // MARK: - Init from SavedGameState
 
-    @Test func initFromSavedStateRestoresBoardColors() {
+    @Test func initFromSavedStateRestoresBoardTypes() {
         var board = makeEmptyBoard()
-        board[19] = Array(repeating: "red", count: 10)
-        board[18][0] = "cyan"
+        board[19] = Array(repeating: "z", count: 10)   // Z-piece raw value
+        board[18][0] = "i"                               // I-piece raw value
 
         let savedState = makeSavedState(board: board)
         let engine = GameEngine(savedState: savedState)
 
-        #expect(engine.gameBoard[19].allSatisfy { $0 == .red })
-        #expect(engine.gameBoard[18][0] == .cyan)
+        #expect(engine.gameBoard[19].allSatisfy { $0 == .z })
+        #expect(engine.gameBoard[18][0] == .i)
     }
 
     @Test func initFromSavedStateRestoresNilCells() {
@@ -526,20 +520,38 @@ struct GameEngineTests {
         #expect(engine.secondNextTetromino != nil)
     }
 
-    @Test func allColorNamesRestoredCorrectly() {
-        let colorMap: [(String, Color)] = [
-            ("cyan", .cyan), ("yellow", .yellow), ("purple", .purple),
-            ("blue", .blue), ("orange", .orange), ("green", .green), ("red", .red)
+    @Test func allTypeRawValuesRestoredCorrectly() {
+        // Tests new format: TetrominoType.rawValue strings
+        let typeMap: [(String, TetrominoType)] = [
+            ("i", .i), ("o", .o), ("t", .t), ("j", .j), ("l", .l), ("s", .s), ("z", .z)
         ]
 
-        for (name, expectedColor) in colorMap {
+        for (rawValue, expectedType) in typeMap {
             var board = makeEmptyBoard()
-            board[0][0] = name
+            board[0][0] = rawValue
 
             let savedState = makeSavedState(board: board)
             let engine = GameEngine(savedState: savedState)
 
-            #expect(engine.gameBoard[0][0] == expectedColor, "Color '\(name)' not restored correctly")
+            #expect(engine.gameBoard[0][0] == expectedType, "Type '\(rawValue)' not restored correctly")
+        }
+    }
+
+    @Test func oldColorNameFormatRestoredCorrectly() {
+        // Tests backward compatibility: old saves used color names
+        let colorNameMap: [(String, TetrominoType)] = [
+            ("cyan", .i), ("yellow", .o), ("purple", .t),
+            ("blue", .j), ("orange", .l), ("green", .s), ("red", .z)
+        ]
+
+        for (colorName, expectedType) in colorNameMap {
+            var board = makeEmptyBoard()
+            board[0][0] = colorName
+
+            let savedState = makeSavedState(board: board)
+            let engine = GameEngine(savedState: savedState)
+
+            #expect(engine.gameBoard[0][0] == expectedType, "Old color name '\(colorName)' not mapped to correct type")
         }
     }
 

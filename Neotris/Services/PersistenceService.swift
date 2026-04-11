@@ -5,7 +5,7 @@
 //  Created by Rishi Singh on 09/04/25.
 //
 
-import SwiftUI
+import Foundation
 import SwiftData
 
 final class PersistenceService {
@@ -20,7 +20,7 @@ final class PersistenceService {
     // MARK: - In-progress game (UserDefaults)
 
     func save(
-        gameBoard: [[Color?]],
+        gameBoard: [[TetrominoType?]],
         currentTetromino: Tetromino?,
         nextTetromino: Tetromino?,
         gameLevel: GameLevel,
@@ -36,7 +36,7 @@ final class PersistenceService {
         )
         for y in 0..<gameBoard.count {
             for x in 0..<gameBoard[y].count {
-                boardColors[y][x] = colorName(for: gameBoard[y][x])
+                boardColors[y][x] = gameBoard[y][x]?.rawValue
             }
         }
 
@@ -102,17 +102,4 @@ final class PersistenceService {
         return try? JSONDecoder().decode(SavedGameState.self, from: data)
     }
 
-    // MARK: - Private helpers
-
-    private func colorName(for color: Color?) -> String? {
-        guard let color else { return nil }
-        if color == .cyan { return "cyan" }
-        if color == .yellow { return "yellow" }
-        if color == .purple { return "purple" }
-        if color == .blue { return "blue" }
-        if color == .orange { return "orange" }
-        if color == .green { return "green" }
-        if color == .red { return "red" }
-        return nil
-    }
 }

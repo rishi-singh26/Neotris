@@ -29,7 +29,7 @@ struct GameInstructionsView: View {
                         Button {
                             dismiss()
                         } label: {
-                            Label("Dismiss", systemImage: "xmark.circle.fill")
+                            Label("Dismiss", systemImage: "xmark")
                         }
                         
                     }

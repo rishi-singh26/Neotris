@@ -7,200 +7,166 @@
 
 import SwiftUI
 import StoreKit
+//#if os(macOS)
+//import AppKit
+//#endif
+
+enum SettingPage {
+    case generalPage
+    case themesPage
+    case privacyPolicy
+    case termsOfUse
+    case helpAndSupport
+}
 
 struct SettingsView: View {
-    var isWindow: Bool = false
     @Environment(GameViewModel.self) private var viewModel
     @Environment(\.dismiss) var dismiss
-
-    @State private var showPrivacyPolicy: Bool = false
-    @State private var showTermsOfUse: Bool = false
+    @Environment(\.colorScheme) var colorScheme
+    
     @State private var showUsageLicense: Bool = false
-
+    @State private var selectedSettingPage: SettingPage = .generalPage
+    
     let privacyPolicyURL = "https://raw.githubusercontent.com/rishi-singh26/Neotris/refs/heads/main/Assets/PrivacyPolicy.md"
     let termsOfuserURL = "https://raw.githubusercontent.com/rishi-singh26/Neotris/refs/heads/main/Assets/TermsOfUse.md"
     let usageLicenseURL = "https://raw.githubusercontent.com/rishi-singh26/Neotris/refs/heads/main/LICENSE"
-
+    
     var body: some View {
         // @Bindable lets us create $bindings from an @Observable object
-        @Bindable var vm = viewModel
-
-        Group {
 #if os(macOS)
-            VStack {
-                HStack {
-                    Text("Settings")
-                        .font(.largeTitle)
-                    Spacer()
+        MacOSSettings()
+#elseif os(iOS)
+        IOSSettings()
+#endif
+    }
+    
+#if os(macOS)
+    @ViewBuilder
+    private func MacOSSettings() -> some View {
+        NavigationSplitView {
+            NavigationListBuilder()
+                .navigationTitle("Settings")
+                .padding(.top, 10)
+        } detail: {
+            switch selectedSettingPage {
+            case .generalPage:
+                GeneralSettingsView()
+                    .navigationTitle("General Settings")
+            case .themesPage:
+                ThemesListView()
+                    .navigationTitle("Game Themes")
+            case .privacyPolicy:
+                MarkdownWebView(url: URL(string: privacyPolicyURL)!)
+                    .navigationTitle("Privacy Policy")
+            case .termsOfUse:
+                MarkdownWebView(url: URL(string: termsOfuserURL)!)
+                    .navigationTitle("Terms of Use")
+            case .helpAndSupport:
+                MarkdownWebView(url: URL(string: privacyPolicyURL)!)
+                    .navigationTitle("Help & Feedback")
+            }
+        }
+        .frame(minWidth: 700, minHeight: 400, maxHeight: 700)
+        .background(WindowToolbarConfigurator())
+    }
+    
+    @ViewBuilder
+    private func NavigationListBuilder() -> some View {
+        List(selection: $selectedSettingPage) {
+            NavigationLink(value: SettingPage.generalPage) {
+                Label("General", systemImage: "gear")
+            }
+            NavigationLink(value: SettingPage.themesPage) {
+                Label("Game Themes", systemImage: "paintpalette")
+            }
+            NavigationLink(value: SettingPage.privacyPolicy) {
+                Label("Privacy Policy", systemImage: "lock.open.display")
+            }
+            NavigationLink(value: SettingPage.termsOfUse) {
+                Label("Terms of Use", systemImage: "list.bullet.rectangle.portrait")
+            }
+            NavigationLink(value: SettingPage.helpAndSupport) {
+                Label("Help & Support", systemImage: "text.bubble")
+            }
+        }
+        //.listStyle(.sidebar)
+        .navigationTitle("Settings")
+        .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 280)
+    }
+#elseif os(iOS)
+    @ViewBuilder
+    private func IOSSettings() -> some View {
+        @Bindable var vm = viewModel
+        
+        NavigationStack {
+            List {
+                Section {
+                    Toggle("Ghost Blocks", isOn: $vm.ghostBlocksEnabled.animation())
+                        .toggleStyle(.switch)
+                    Toggle("Haptic Feedback", isOn: $vm.hapticFeedbackEnabled.animation())
+                        .toggleStyle(.switch)
                 }
-                .padding([.horizontal, .top], 30)
-                .padding(.bottom, -1)
-                ScrollView {
-                    MacCustomSection {
-                        HStack(alignment: .center) {
-                            Text("Ghost Blocks")
-                                .frame(width: 150, alignment: .leading)
-                            Spacer()
-                            Toggle("", isOn: $vm.ghostBlocksEnabled.animation())
-                                .toggleStyle(.switch)
-                        }
-                    }
-
-                    MacCustomSection {
-                        HStack(alignment: .center) {
-                            Text("Game Theme")
-                                .frame(width: 150, alignment: .leading)
-                            Spacer()
-                            Picker("", selection: $vm.gameTheme.animation()) {
-                                Label("System", systemImage: "iphone.gen2").tag(0)
-                                Label("Light", systemImage: "sun.max").tag(1)
-                                Label("Dark", systemImage: "moon.stars").tag(2)
+                
+                Section {
+                    Picker(selection: $vm.gameTheme.animation()) {
+                        Label("System", systemImage: "iphone.gen2").tag(0)
+                        Label("Light", systemImage: "sun.max").tag(1)
+                        Label("Dark", systemImage: "moon.stars").tag(2)
+                    } label: {
+                        Label {
+                            Text("Game Appearance")
+                        } icon: {
+                            ZStack {
+                                Image(systemName: "circle.lefthalf.filled")
+                                    .scaleEffect(1.2)
+                                Image(systemName: "circle.lefthalf.filled")
+                                    .foregroundStyle(.background)
+                                    .scaleEffect(0.6)
+                                Image(systemName: "circle.righthalf.filled")
+                                    .scaleEffect(0.6)
                             }
                         }
-                    }
 
-                    MacCustomSection(footer: "Want to support my work? Star the GitHub repository to show support. Go the Open Source Code and click on the STAR button.") {
-                        Button { showPrivacyPolicy = true } label: {
-                            CustomLabel(leadingImageName: "bolt.shield", trailingImageName: "chevron.up", title: "Privacy Policy")
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        Divider().padding(.vertical, 2)
-                        Button { showTermsOfUse = true } label: {
-                            CustomLabel(leadingImageName: "list.bullet.rectangle.portrait", trailingImageName: "chevron.up", title: "Terms of Use")
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        Divider().padding(.vertical, 2)
-                        Link(destination: URL(string: "https://letterbird.co/neotris")!) {
-                            CustomLabel(leadingImageName: "text.bubble", trailingImageName: "arrow.up.right", title: "Help & Support")
-                        }
-                        Divider().padding(.vertical, 2)
-                        Link(destination: URL(string: "https://github.com/rishi-singh26/Neotris")!) {
-                            CustomLabel(leadingImageName: "lock.open.display", trailingImageName: "arrow.up.right", title: "Open Source Code")
-                        }
                     }
-                    .padding(.bottom)
-
-                    MacCustomSection {
-                        Button { getFeedback() } label: {
-                            CustomLabel(leadingImageName: "star", title: "Rate Us")
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        Divider().padding(.vertical, 2)
-                        Text("Neotris v.1.0.0")
-                    }
-                    .padding(.bottom)
                 }
-                .padding(.bottom)
-            }
-            .background(isWindow ? nil : VisualEffectView(material: .popover, blendingMode: .behindWindow))
-            .toolbar {
-                if !isWindow {
-                    Button("Done") { dismiss() }
+                
+                NavigationLink {
+                    ThemesListView()
+                } label: {
+                    Label("Game Themes", systemImage: "paintpalette")
+                }
+                NavigationLink {
+                    MarkdownWebView(url: URL(string: privacyPolicyURL)!)
+                } label: {
+                    Label("Privacy Policy", systemImage: "lock.open.display")
+                }
+                NavigationLink {
+                    MarkdownWebView(url: URL(string: termsOfuserURL)!)
+                } label: {
+                    Label("Terms of Use", systemImage: "list.bullet.rectangle.portrait")
+                }
+                NavigationLink {
+                    MarkdownWebView(url: URL(string: privacyPolicyURL)!)
+                } label: {
+                    Label("Help & Support", systemImage: "text.bubble")
+                }
+                
+                Section {
+                    Link(destination: URL(string: "https://github.com/rishi-singh26/Neotris")!) {
+                        CustomLabel(leadingImageName: "lock.open.display", trailingImageName: "arrow.up.right", title: "Open Source Code")
+                    }
+                    Button { getFeedback() } label: {
+                        Label("Rate Us", systemImage: "star")
+                    }
+                    Text("Neotris v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
                 }
             }
-#else
-            NavigationView {
-                List {
-                    Section {
-                        Toggle(isOn: $vm.hapticFeedbackEnabled.animation()) {
-                            Label(
-                                "Haptic Feedback",
-                                systemImage: viewModel.hapticFeedbackEnabled ? "hand.tap.fill" : "hand.tap"
-                            )
-                        }
-                        .toggleStyle(.switch)
-                        Toggle(isOn: $vm.ghostBlocksEnabled.animation()) {
-                            Label(
-                                "Ghost Blocks",
-                                systemImage: viewModel.ghostBlocksEnabled ? "inset.filled.square.dashed" : "square.dashed"
-                            )
-                        }
-                    }
-                    .listRowBackground(Rectangle().fill(.thinMaterial))
-
-                    Section {
-                        Picker(selection: $vm.gameTheme.animation()) {
-                            Label("System", systemImage: "iphone.gen2").tag(0)
-                            Label("Light", systemImage: "sun.max").tag(1)
-                            Label("Dark", systemImage: "moon.stars").tag(2)
-                        } label: {
-                            Label("Game Theme", systemImage: getColorSchemeIcon())
-                        }
-                    }
-                    .listRowBackground(Rectangle().fill(.thinMaterial))
-
-                    Section {
-                        Button { showPrivacyPolicy = true } label: {
-                            CustomLabel(leadingImageName: "bolt.shield", trailingImageName: "chevron.up", title: "Privacy Policy")
-                        }
-                        Button { showTermsOfUse = true } label: {
-                            CustomLabel(leadingImageName: "list.bullet.rectangle.portrait", trailingImageName: "chevron.up", title: "Terms of Use")
-                        }
-                        Link(destination: URL(string: "https://letterbird.co/neotris")!) {
-                            CustomLabel(leadingImageName: "text.bubble", trailingImageName: "arrow.up.right", title: "Help & Support")
-                        }
-                        Link(destination: URL(string: "https://github.com/rishi-singh26/Neotris")!) {
-                            CustomLabel(leadingImageName: "lock.open.display", trailingImageName: "arrow.up.right", title: "Open Source Code")
-                        }
-                    }
-                    .listRowBackground(Rectangle().fill(.thinMaterial))
-
-                    Section {
-                        Button { getFeedback() } label: {
-                            Label("Rate Us", systemImage: "star")
-                        }
-                        Text("Neotris v.1.0.0")
-                    }
-                    .listRowBackground(Rectangle().fill(.thinMaterial))
-                }
-                .scrollContentBackground(.hidden)
-                .navigationTitle("Settings")
-                .toolbar {
-                    ToolbarItem {
-                        Button { dismiss() } label: {
-                            Label("Dismiss", systemImage: "xmark.circle.fill")
-                        }
-                    }
-                }
-            }
+            .navigationTitle("Settings")
+            .navigationSplitViewColumnWidth(min: 170, ideal: 190, max: 280)
+        }
+    }
 #endif
-        }
-        .sheet(isPresented: $showPrivacyPolicy) {
-            BuildSheetView(url: URL(string: privacyPolicyURL), navigationTitle: "Privacy Policy")
-        }
-        .sheet(isPresented: $showTermsOfUse) {
-            BuildSheetView(url: URL(string: termsOfuserURL), navigationTitle: "Terms Of Use")
-        }
-        .sheet(isPresented: $showUsageLicense) {
-            BuildSheetView(url: URL(string: usageLicenseURL), navigationTitle: "Usage License")
-        }
-    }
-
-    @ViewBuilder
-    private func BuildSheetView(url: URL?, navigationTitle: String) -> some View {
-#if os(macOS)
-        MarkdownWebView(url: url!)
-            .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
-#else
-        NavigationView {
-            MarkdownWebView(url: url!)
-                .navigationTitle(navigationTitle)
-                .navigationBarTitleDisplayMode(.inline)
-        }
-        .presentationDetents([.large])
-        .presentationBackground(.thinMaterial)
-        .presentationCornerRadius(25)
-#endif
-    }
-
-    private func getColorSchemeIcon() -> String {
-        switch viewModel.gameTheme {
-        case 1:  return "sun.max"
-        case 2:  return "moon.stars"
-        default: return "iphone.gen2"
-        }
-    }
-
+    
     private func getFeedback() {
 #if os(iOS)
         if let scene = UIApplication.shared.connectedScenes
@@ -212,6 +178,21 @@ struct SettingsView: View {
 #endif
     }
 }
+
+#if os(macOS)
+private struct WindowToolbarConfigurator: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            guard let window = view.window else { return }
+            window.toolbarStyle = .unifiedCompact
+            window.titlebarAppearsTransparent = true
+        }
+        return view
+    }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+#endif
 
 #Preview {
     SettingsView()
