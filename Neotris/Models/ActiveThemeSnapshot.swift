@@ -30,6 +30,16 @@ struct ActiveThemeSnapshot: Codable {
         self.meshPointsY = theme.meshPointsY
     }
 
+    init(from builtInTheme: BuiltInTheme) {
+        self.themeID = builtInTheme.id
+        self.tetrominoColors = builtInTheme.tetrominoColors
+        self.meshWidth = builtInTheme.meshWidth
+        self.meshHeight = builtInTheme.meshHeight
+        self.meshColors = builtInTheme.meshColors
+        self.meshPointsX = builtInTheme.meshPointsX
+        self.meshPointsY = builtInTheme.meshPointsY
+    }
+
     /// SIMD2<Float> points suitable for MeshGradient
     var simdPoints: [SIMD2<Float>] {
         guard meshPointsX.count == meshPointsY.count else { return [] }

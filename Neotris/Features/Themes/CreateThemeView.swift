@@ -8,6 +8,14 @@
 import SwiftUI
 import SwiftData
 
+/// Describes how the CreateThemeView was opened.
+enum ThemeCreationMode {
+    case create
+    case edit(GameTheme)
+    case duplicateCustom(GameTheme)
+    case duplicateBuiltIn(BuiltInTheme)
+}
+
 struct CreateThemeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(GameViewModel.self) private var viewModel
@@ -31,23 +39,19 @@ struct CreateThemeView: View {
     @State private var showingBackgroundSheet: Bool = false
 
     var themesCount: Int
-    var existingTheme: GameTheme?
+    var mode: ThemeCreationMode
 
-    private var isEditing: Bool { existingTheme != nil }
+    private var isEditing: Bool {
+        if case .edit = mode { return true }
+        return false
+    }
 
-    init(themesCount: Int, existingTheme: GameTheme? = nil) {
+    init(themesCount: Int, mode: ThemeCreationMode = .create) {
         self.themesCount = themesCount
-        self.existingTheme = existingTheme
+        self.mode = mode
 
-        if let theme = existingTheme {
-            _themeName       = State(initialValue: theme.name)
-            _tetrominoColors = State(initialValue: theme.tetrominoColors.map { Color(hex: $0) })
-            _meshWidth       = State(initialValue: theme.meshWidth)
-            _meshHeight      = State(initialValue: theme.meshHeight)
-            _meshColors      = State(initialValue: theme.meshColors.map { Color(hex: $0) })
-            _meshPointsX     = State(initialValue: theme.meshPointsX)
-            _meshPointsY     = State(initialValue: theme.meshPointsY)
-        } else {
+        switch mode {
+        case .create:
             _themeName       = State(initialValue: "")
             _tetrominoColors = State(initialValue: GameTheme.defaultTetrominoHexColors.map { Color(hex: $0) })
             _meshWidth       = State(initialValue: 3)
@@ -55,6 +59,33 @@ struct CreateThemeView: View {
             _meshColors      = State(initialValue: GameTheme.defaultMeshHexColors.map { Color(hex: $0) })
             _meshPointsX     = State(initialValue: GameTheme.defaultMeshPointsX)
             _meshPointsY     = State(initialValue: GameTheme.defaultMeshPointsY)
+
+        case .edit(let theme):
+            _themeName       = State(initialValue: theme.name)
+            _tetrominoColors = State(initialValue: theme.tetrominoColors.map { Color(hex: $0) })
+            _meshWidth       = State(initialValue: theme.meshWidth)
+            _meshHeight      = State(initialValue: theme.meshHeight)
+            _meshColors      = State(initialValue: theme.meshColors.map { Color(hex: $0) })
+            _meshPointsX     = State(initialValue: theme.meshPointsX)
+            _meshPointsY     = State(initialValue: theme.meshPointsY)
+
+        case .duplicateCustom(let theme):
+            _themeName       = State(initialValue: "\(theme.name) Copy")
+            _tetrominoColors = State(initialValue: theme.tetrominoColors.map { Color(hex: $0) })
+            _meshWidth       = State(initialValue: theme.meshWidth)
+            _meshHeight      = State(initialValue: theme.meshHeight)
+            _meshColors      = State(initialValue: theme.meshColors.map { Color(hex: $0) })
+            _meshPointsX     = State(initialValue: theme.meshPointsX)
+            _meshPointsY     = State(initialValue: theme.meshPointsY)
+
+        case .duplicateBuiltIn(let builtIn):
+            _themeName       = State(initialValue: "\(builtIn.name) Copy")
+            _tetrominoColors = State(initialValue: builtIn.tetrominoColors.map { Color(hex: $0) })
+            _meshWidth       = State(initialValue: builtIn.meshWidth)
+            _meshHeight      = State(initialValue: builtIn.meshHeight)
+            _meshColors      = State(initialValue: builtIn.meshColors.map { Color(hex: $0) })
+            _meshPointsX     = State(initialValue: builtIn.meshPointsX)
+            _meshPointsY     = State(initialValue: builtIn.meshPointsY)
         }
     }
 
@@ -106,7 +137,7 @@ struct CreateThemeView: View {
             .presentationDetents([.large])
         }
     }
-    
+
 #if os(iOS)
     @ViewBuilder
     private func IOSViewBuilder() -> some View {
@@ -114,7 +145,7 @@ struct CreateThemeView: View {
             Section {
                 TextField("Theme Name", text: $themeName)
             }
-            
+
             ForEach(TetrominoType.allCases.indices, id: \.self) { index in
                 ColorPicker(selection: $tetrominoColors[index], supportsOpacity: false) {
                     HStack {
@@ -124,7 +155,7 @@ struct CreateThemeView: View {
                     }
                 }
             }
-            
+
             Section {
                 Button {
                     showingBackgroundSheet = true
@@ -135,7 +166,7 @@ struct CreateThemeView: View {
         }
     }
 #endif
-    
+
 #if os(macOS)
     @ViewBuilder
     private func MacOSViewBuilder() -> some View {
@@ -144,7 +175,7 @@ struct CreateThemeView: View {
                 TextField("", text: $themeName, prompt: Text("Theme Name"))
             }
             .padding(.top)
-            
+
             MacCustomSection(header: "Tetromino Colors") {
                 ForEach(TetrominoType.allCases.indices, id: \.self) { index in
                     ColorPicker(selection: $tetrominoColors[index], supportsOpacity: false) {
@@ -157,7 +188,7 @@ struct CreateThemeView: View {
                     }
                 }
             }
-            
+
             MacCustomSection {
                 Button {
                     showingBackgroundSheet = true
@@ -172,7 +203,7 @@ struct CreateThemeView: View {
 
     // MARK: - Save
     private func saveTheme() {
-        if let theme = existingTheme {
+        if case .edit(let theme) = mode {
             // Edit mode — mutate the SwiftData object directly (auto-persisted)
             theme.name            = themeName.isEmpty ? theme.name : themeName
             theme.tetrominoColors = tetrominoColors.map { $0.toHexString() }
@@ -186,7 +217,7 @@ struct CreateThemeView: View {
                 viewModel.applyTheme(theme)
             }
         } else {
-            // Create mode — existing logic
+            // Create / duplicate modes — insert a new GameTheme
             let name = themeName.isEmpty ? "Theme \(themesCount + 1)" : themeName
             let theme = GameTheme(name: name, themeIndex: themesCount)
             theme.tetrominoColors = tetrominoColors.map { $0.toHexString() }

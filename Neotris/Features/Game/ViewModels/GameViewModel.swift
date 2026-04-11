@@ -292,6 +292,19 @@ final class GameViewModel {
         }
     }
 
+    /// Applies a BuiltInTheme. The Default built-in theme calls clearTheme() for backward compatibility.
+    func applyBuiltInTheme(_ theme: BuiltInTheme) {
+        if theme.id == BuiltInTheme.default.id {
+            clearTheme()
+            return
+        }
+        let snapshot = ActiveThemeSnapshot(from: theme)
+        activeThemeSnapshot = snapshot
+        if let data = try? JSONEncoder().encode(snapshot) {
+            UserDefaults.standard.set(data, forKey: "activeGameTheme")
+        }
+    }
+
     /// Clears the active theme, reverting to built-in defaults.
     func clearTheme() {
         activeThemeSnapshot = nil

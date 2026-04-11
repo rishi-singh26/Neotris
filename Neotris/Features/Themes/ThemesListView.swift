@@ -17,6 +17,8 @@ struct ThemesListView: View {
     #endif
     @State private var themeToEdit: GameTheme? = nil
     @State private var themeToDelete: GameTheme? = nil
+    @State private var customThemeToDuplicate: GameTheme? = nil
+    @State private var builtInThemeToDuplicate: BuiltInTheme? = nil
 
     @Query(sort: \GameTheme.creationDate) private var themes: [GameTheme]
 
@@ -52,10 +54,28 @@ struct ThemesListView: View {
         .sheet(item: $themeToEdit) { theme in
 #if os(iOS)
             NavigationStack {
-                CreateThemeView(themesCount: themes.count, existingTheme: theme)
+                CreateThemeView(themesCount: themes.count, mode: .edit(theme))
             }
 #else
-            CreateThemeView(themesCount: themes.count, existingTheme: theme)
+            CreateThemeView(themesCount: themes.count, mode: .edit(theme))
+#endif
+        }
+        .sheet(item: $customThemeToDuplicate) { theme in
+#if os(iOS)
+            NavigationStack {
+                CreateThemeView(themesCount: themes.count, mode: .duplicateCustom(theme))
+            }
+#else
+            CreateThemeView(themesCount: themes.count, mode: .duplicateCustom(theme))
+#endif
+        }
+        .sheet(item: $builtInThemeToDuplicate) { theme in
+#if os(iOS)
+            NavigationStack {
+                CreateThemeView(themesCount: themes.count, mode: .duplicateBuiltIn(theme))
+            }
+#else
+            CreateThemeView(themesCount: themes.count, mode: .duplicateBuiltIn(theme))
 #endif
         }
     }
@@ -66,8 +86,25 @@ struct ThemesListView: View {
     @ViewBuilder
     private func IOSViewBuilder() -> some View {
         List {
-            Section {
-                DefaultThemeRowBuilder()
+            Section("Built-in") {
+                ForEach(BuiltInTheme.all) { theme in
+                    BuiltInThemeRowBuilder(for: theme)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                builtInThemeToDuplicate = theme
+                            } label: {
+                                Label("Duplicate", systemImage: "doc.on.doc")
+                            }
+                            .tint(.orange)
+                        }
+                        .contextMenu {
+                            Button {
+                                builtInThemeToDuplicate = theme
+                            } label: {
+                                Label("Duplicate", systemImage: "doc.on.doc")
+                            }
+                        }
+                }
             }
 
             Section("Custom Themes") {
@@ -80,6 +117,12 @@ struct ThemesListView: View {
                                 Label("Edit", systemImage: "slider.horizontal.3")
                             }
                             .tint(.blue)
+                            Button {
+                                customThemeToDuplicate = theme
+                            } label: {
+                                Label("Duplicate", systemImage: "doc.on.doc")
+                            }
+                            .tint(.orange)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
@@ -94,6 +137,11 @@ struct ThemesListView: View {
                             } label: {
                                 Label("Edit", systemImage: "slider.horizontal.3")
                             }
+                            Button {
+                                customThemeToDuplicate = theme
+                            } label: {
+                                Label("Duplicate", systemImage: "doc.on.doc")
+                            }
                             Divider()
                             Button(role: .destructive) {
                                 themeToDelete = theme
@@ -104,7 +152,7 @@ struct ThemesListView: View {
                 }
 
                 NavigationLink {
-                    CreateThemeView(themesCount: themes.count)
+                    CreateThemeView(themesCount: themes.count, mode: .create)
                 } label: {
                     Label("Create New Theme", systemImage: "plus.circle.fill")
                         .foregroundStyle(Color.accentColor)
@@ -114,7 +162,7 @@ struct ThemesListView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 NavigationLink {
-                    CreateThemeView(themesCount: themes.count)
+                    CreateThemeView(themesCount: themes.count, mode: .create)
                 } label: {
                     Image(systemName: "plus")
                 }
@@ -128,7 +176,22 @@ struct ThemesListView: View {
     private func MacOSViewBuilder() -> some View {
         ScrollView {
             MacCustomSection(header: "Built-in") {
-                DefaultThemeRowBuilder()
+                VStack(spacing: 4) {
+                    ForEach(BuiltInTheme.all) { theme in
+                        BuiltInThemeRowBuilder(for: theme)
+                            .contextMenu {
+                                Button {
+                                    builtInThemeToDuplicate = theme
+                                } label: {
+                                    Label("Duplicate Theme", systemImage: "doc.on.doc")
+                                }
+                            }
+
+                        if theme.id != BuiltInTheme.all.last?.id {
+                            Divider().padding(.vertical, 2)
+                        }
+                    }
+                }
             }
 
             MacCustomSection(header: "Custom Themes") {
@@ -140,6 +203,11 @@ struct ThemesListView: View {
                                     themeToEdit = theme
                                 } label: {
                                     Label("Edit Theme", systemImage: "slider.horizontal.3")
+                                }
+                                Button {
+                                    customThemeToDuplicate = theme
+                                } label: {
+                                    Label("Duplicate Theme", systemImage: "doc.on.doc")
                                 }
                                 Divider()
                                 Button(role: .destructive) {
@@ -181,7 +249,7 @@ struct ThemesListView: View {
             }
         }
         .sheet(isPresented: $showAddThemeSheet) {
-            CreateThemeView(themesCount: themes.count)
+            CreateThemeView(themesCount: themes.count, mode: .create)
         }
     }
 #endif
@@ -189,13 +257,23 @@ struct ThemesListView: View {
     // MARK: - Shared Row Builders
 
     @ViewBuilder
-    private func DefaultThemeRowBuilder() -> some View {
+    private func BuiltInThemeRowBuilder(for theme: BuiltInTheme) -> some View {
+        let isActive: Bool = theme.id == BuiltInTheme.default.id
+            ? viewModel.activeThemeSnapshot == nil
+            : viewModel.activeThemeSnapshot?.themeID == theme.id
         ThemeRowView(
-            title: "Default",
-            subtitle: "Built-in colors",
-            colors: GameTheme.defaultTetrominoHexColors.prefix(4).map { Color(hex: $0) },
-            isActive: viewModel.activeThemeSnapshot == nil,
-            onSelect: { viewModel.clearTheme() }
+            title: theme.name,
+            subtitle: "Built-in",
+            colors: theme.tetrominoColors.prefix(4).map { Color(hex: $0) },
+            isActive: isActive,
+            onSelect: {
+                if theme.id == BuiltInTheme.default.id {
+                    viewModel.clearTheme()
+                } else {
+                    viewModel.applyBuiltInTheme(theme)
+                }
+            },
+            onDuplicate: { builtInThemeToDuplicate = theme }
         )
     }
 
@@ -208,11 +286,12 @@ struct ThemesListView: View {
             isActive: viewModel.activeThemeSnapshot?.themeID == theme.id.uuidString,
             onSelect: { viewModel.applyTheme(theme) },
             onEdit: { themeToEdit = theme },
+            onDuplicate: { customThemeToDuplicate = theme },
             onDelete: { themeToDelete = theme }
         )
     }
 
-    /// Unified row view for both the default and custom theme rows.
+    /// Unified row view for both built-in and custom theme rows.
     /// Platform layout differences (radio button vs tap-anywhere on iOS, ellipsis menu on macOS) are handled internally.
     @ViewBuilder
     private func ThemeRowView(
@@ -222,6 +301,7 @@ struct ThemesListView: View {
         isActive: Bool,
         onSelect: @escaping () -> Void,
         onEdit: (() -> Void)? = nil,
+        onDuplicate: (() -> Void)? = nil,
         onDelete: (() -> Void)? = nil
     ) -> some View {
 #if os(iOS)
@@ -262,11 +342,20 @@ struct ThemesListView: View {
             }
             Spacer()
             themeColorDots(colors: colors)
-            if let onEdit, let onDelete {
+            if onEdit != nil || onDuplicate != nil || onDelete != nil {
                 Menu {
-                    Button("Edit", systemImage: "slider.horizontal.3") { onEdit() }
-                    Divider()
-                    Button("Delete", systemImage: "trash", role: .destructive) { onDelete() }
+                    if let onEdit {
+                        Button("Edit", systemImage: "slider.horizontal.3") { onEdit() }
+                    }
+                    if let onDuplicate {
+                        Button("Duplicate", systemImage: "doc.on.doc") { onDuplicate() }
+                    }
+                    if (onEdit != nil || onDuplicate != nil) && onDelete != nil {
+                        Divider()
+                    }
+                    if let onDelete {
+                        Button("Delete", systemImage: "trash", role: .destructive) { onDelete() }
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
