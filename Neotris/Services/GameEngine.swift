@@ -206,13 +206,17 @@ final class GameEngine {
 
     private func checkForCompletedLines() -> (linesCleared: Int, didLevelUp: Bool) {
         var completed = 0
-        for y in (0..<boardHeight).reversed() {
+        var y = boardHeight - 1
+        while y >= 0 {
             if gameBoard[y].allSatisfy({ $0 != nil }) {
                 for j in stride(from: y, through: 1, by: -1) {
                     gameBoard[j] = gameBoard[j - 1]
                 }
                 gameBoard[0] = Array(repeating: nil, count: boardWidth)
                 completed += 1
+                // Do not decrement y — re-check this row since content shifted down
+            } else {
+                y -= 1
             }
         }
         guard completed > 0 else { return (0, false) }
