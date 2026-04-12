@@ -159,52 +159,51 @@ struct GamesListView: View {
             [SortDescriptor(\TetrisGameSession.playDuration, order: sortOrder ? .forward : .reverse)]
         }
         _gameSessions = Query(sort: sortDescriptors)
-
-        // Update high score from completed sessions
-        var highScore = UserDefaults.standard.integer(forKey: ScoreSystem.highScoreKey)
-        self.gameSessions.forEach { session in
-            if session.score > highScore { highScore = session.score }
-        }
-        UserDefaults.standard.set(highScore, forKey: ScoreSystem.highScoreKey)
     }
 
     var body: some View {
-        if gameSessions.isEmpty {
-            Text("No completed games yet")
-                .foregroundColor(.gray)
-        } else {
-            ForEach(gameSessions) { session in
-                VStack {
-                    SessionTileBuilder(session: session)
+        Group {
+            if gameSessions.isEmpty {
+                Text("No completed games yet")
+                    .foregroundColor(.gray)
+            } else {
+                ForEach(gameSessions) { session in
+                    VStack {
+                        SessionTileBuilder(session: session)
 #if os(macOS)
-                    if gameSessions.last?.id != session.id {
-                        Divider()
-                    }
+                        if gameSessions.last?.id != session.id {
+                            Divider()
+                        }
 #endif
-                }
+                    }
 #if os(iOS)
-                .swipeActions(edge: .trailing) {
-                    Button {
-                        showDeleteConfirmation(session: session)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                    .swipeActions(edge: .trailing) {
+                        Button {
+                            showDeleteConfirmation(session: session)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .tint(.red)
                     }
-                    .tint(.red)
-                }
 #endif
-                .contextMenu {
-                    Button(role: .destructive, action: {
-                        showDeleteConfirmation(session: session)
-                    }, label: {
-                        Label("Delete", systemImage: "trash")
-                    })
+                    .contextMenu {
+                        Button(role: .destructive, action: {
+                            showDeleteConfirmation(session: session)
+                        }, label: {
+                            Label("Delete", systemImage: "trash")
+                        })
+                    }
+                }
+                .confirmationDialog("Alert", isPresented: $showDeleteConfirmation, actions: {
+                    Button("Delete", role: .destructive) { deleteGame() }
+                }) {
+                    Text("Are you sure you want to delete this game session?")
                 }
             }
-            .confirmationDialog("Alert", isPresented: $showDeleteConfirmation, actions: {
-                Button("Delete", role: .destructive) { deleteGame() }
-            }) {
-                Text("Are you sure you want to delete this game session?")
-            }
+        }
+        .onAppear(perform: updateHighScore)
+        .onChange(of: gameSessions.count) { _, _ in
+            updateHighScore()
         }
     }
 
@@ -252,6 +251,11 @@ struct GamesListView: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter
+    }
+
+    private func updateHighScore() {
+        let highScore = gameSessions.map(\.score).max() ?? 0
+        UserDefaults.standard.set(highScore, forKey: ScoreSystem.highScoreKey)
     }
 }
 
