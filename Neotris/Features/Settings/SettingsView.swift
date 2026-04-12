@@ -16,7 +16,6 @@ enum SettingPage {
     case themesPage
     case privacyPolicy
     case termsOfUse
-    case helpAndSupport
 }
 
 struct SettingsView: View {
@@ -61,9 +60,6 @@ struct SettingsView: View {
             case .termsOfUse:
                 MarkdownWebView(url: URL(string: termsOfuserURL)!)
                     .navigationTitle("Terms of Use")
-            case .helpAndSupport:
-                MarkdownWebView(url: URL(string: privacyPolicyURL)!)
-                    .navigationTitle("Help & Feedback")
             }
         }
         .frame(minWidth: 700, minHeight: 400, maxHeight: 700)
@@ -85,7 +81,7 @@ struct SettingsView: View {
             NavigationLink(value: SettingPage.termsOfUse) {
                 Label("Terms of Use", systemImage: "list.bullet.rectangle.portrait")
             }
-            NavigationLink(value: SettingPage.helpAndSupport) {
+            Link(destination: URL(string: "https://letterbird.co/neotris")!) {
                 Label("Help & Support", systemImage: "text.bubble")
             }
         }
@@ -145,9 +141,8 @@ struct SettingsView: View {
                 } label: {
                     Label("Terms of Use", systemImage: "list.bullet.rectangle.portrait")
                 }
-                NavigationLink {
-                    MarkdownWebView(url: URL(string: privacyPolicyURL)!)
-                } label: {
+                
+                Link(destination: URL(string: "https://letterbird.co/neotris")!) {
                     Label("Help & Support", systemImage: "text.bubble")
                 }
                 
