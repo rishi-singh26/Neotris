@@ -14,22 +14,12 @@ struct TetrisGameView: View {
     @Environment(GameViewModel.self) private var viewModel
     @Environment(\.colorScheme) var colorScheme
 
-    @State private var showAlert: Bool = false
-    @AppStorage("headerText") var headerText: String = "Neotris"
-
     var body: some View {
         ZStack {
             GameBackgroundView()
 
             VStack(spacing: 10) {
-                Text(headerText.isEmpty ? "Neotris" : headerText)
-                    .foregroundStyle(.white)
-                    .font(.largeTitle.bold())
-                    .fontDesign(.monospaced)
-                    .gesture(
-                        TapGesture(count: 2)
-                            .onEnded { showAlert.toggle() }
-                    )
+                HeaderTextView()
 
                 if DeviceType.current == .iPhone {
                     ScoreBarView()
@@ -87,6 +77,7 @@ struct TetrisGameView: View {
                     }
                 }
         )
+        .environment(\.colorScheme, getColorScheme())
         .sheet(isPresented: $showSettingSheet) {
             SettingsView()
                 .presentationDetents(DeviceType.current == .iPhone ? [.medium, .large] : [.large])
@@ -99,39 +90,10 @@ struct TetrisGameView: View {
             GameSessionsListView()
                 .presentationDetents(DeviceType.current == .iPhone ? [.medium, .large] : [.large])
         }
-#if os(macOS)
-        .alert("Header Text", isPresented: $showAlert) {
-            TextField("Enter text here", text: $headerText)
-            Button("Reset", role: .cancel) { headerText = "Neotris" }
-            Button("Update") {}
-        } message: {
-            Text("Update header text")
-        }
-#else
-        .alert(isPresented: $showAlert) {
-            CustomDialogTwo(
-                title: "Header Text",
-                content: "Update header text",
-                button1: .init(content: "Update", tint: .blue, foreground: .white, action: { text in
-                    headerText = text
-                    showAlert = false
-                }),
-                button2: .init(content: "Reset", tint: .red, foreground: .white, action: { _ in
-                    headerText = "Neotris"
-                    showAlert = false
-                }),
-                addsTextField: true,
-                textFieldHint: "Neotris"
-            )
-            .transition(.scale.combined(with: .opacity))
-            .animation(.easeInOut(duration: 0.3), value: viewModel.gameState == .gameOver)
-        } background: {}
-#endif
         .onAppear {
             setupKeyboardControls()
             viewModel.prepareHapticsIfEnabled()
         }
-        .environment(\.colorScheme, getColorScheme())
     }
 
     private func setupKeyboardControls() {

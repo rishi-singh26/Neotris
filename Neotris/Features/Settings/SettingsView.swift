@@ -81,9 +81,6 @@ struct SettingsView: View {
             NavigationLink(value: SettingPage.termsOfUse) {
                 Label("Terms of Use", systemImage: "list.bullet.rectangle.portrait")
             }
-            Link(destination: URL(string: "https://letterbird.co/neotris")!) {
-                Label("Help & Support", systemImage: "text.bubble")
-            }
         }
         //.listStyle(.sidebar)
         .navigationTitle("Settings")
@@ -143,7 +140,7 @@ struct SettingsView: View {
                 }
                 
                 Link(destination: URL(string: "https://letterbird.co/neotris")!) {
-                    Label("Help & Support", systemImage: "text.bubble")
+                    CustomLabel(leadingImageName: "text.bubble", trailingImageName: "arrow.up.right", title: "Help & Support")
                 }
                 
                 Section {
