@@ -189,4 +189,5 @@ private struct WindowToolbarConfigurator: NSViewRepresentable {
 #Preview {
     SettingsView()
         .environment(GameViewModel())
+        .environment(RemoteDataService())
 }

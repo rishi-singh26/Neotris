@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct AppUpdateCheckView: View {
+    @Environment(RemoteDataService.self) private var remoteDataService
     @State private var updateAppInfo: VersionCheckService.ReturnResult?
     @State private var forcedUpdate: Bool = false
     
@@ -24,6 +25,9 @@ struct AppUpdateCheckView: View {
                 //else {
                 //    print("No Updates Available")
                 //}
+            }
+            .task {
+                await remoteDataService.fetchAllData()
             }
     }
 }

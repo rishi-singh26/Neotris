@@ -13,6 +13,7 @@ struct NeotrisApp: App {
     @Environment(\.openWindow) var openWindow
     let sharedModelContainer: ModelContainer
     @State private var viewModel: GameViewModel
+    @State private var remoteDataService = RemoteDataService()
 
     let gameWidth: CGFloat = 650
     let gameHeight: CGFloat = 790
@@ -40,6 +41,7 @@ struct NeotrisApp: App {
             AppUpdateCheckView()
                 .frame(minWidth: gameWidth, maxWidth: .infinity, minHeight: gameHeight, maxHeight: .infinity)
                 .environment(viewModel)
+                .environment(remoteDataService)
         }
         .modelContainer(sharedModelContainer)
         .defaultSize(width: gameWidth, height: gameHeight)
@@ -71,6 +73,7 @@ struct NeotrisApp: App {
         Settings {
             SettingsView()
                 .environment(viewModel)
+                .environment(remoteDataService)
         }
         .defaultSize(width: 700, height: 400)
         .windowResizability(.contentSize)

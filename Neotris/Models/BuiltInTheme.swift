@@ -8,7 +8,7 @@
 import Foundation
 
 /// A hardcoded built-in theme. Not stored in SwiftData — pure static Swift data.
-struct BuiltInTheme: Identifiable, Equatable {
+struct BuiltInTheme: Identifiable, Equatable, Codable {
     let id: String
     let name: String
     /// Hex color strings for each TetrominoType in allCases order: i, o, t, j, l, s, z

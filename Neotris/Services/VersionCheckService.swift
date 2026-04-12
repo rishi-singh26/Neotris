@@ -45,7 +45,7 @@ class VersionCheckService {
                 )
             }
             
-            print(availableVersion, currentVersion, appLogo, appURL, releaseNotes)
+            // print(availableVersion, currentVersion, appLogo, appURL, releaseNotes)
             
             return nil
         } catch {
