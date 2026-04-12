@@ -44,6 +44,10 @@ struct GeneralSettingsView: View {
             }
 
             MacCustomSection {
+                Link(destination: URL(string: "https://letterbird.co/neotris")!) {
+                    CustomLabel(leadingImageName: "text.bubble", trailingImageName: "arrow.up.right", title: "Help & Support")
+                }
+                Divider().padding(.vertical, 2)
                 Link(destination: URL(string: "https://github.com/rishi-singh26/Neotris")!) {
                     CustomLabel(leadingImageName: "lock.open.display", trailingImageName: "arrow.up.right", title: "Open Source Code")
                 }
