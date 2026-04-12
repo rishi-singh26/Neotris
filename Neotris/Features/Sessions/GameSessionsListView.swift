@@ -14,19 +14,17 @@ enum SortBy: String, Codable, CaseIterable {
     case score
     case level
     case playDuration
-    
-    var id: Self {
-        self
-    }
+
+    var id: Self { self }
 }
 
 struct GameSessionsListView: View {
-    var isWindow: Bool = false
-    @EnvironmentObject var gameModel: TetrisGameModel
+    @Environment(GameViewModel.self) private var viewModel
     @Environment(\.dismiss) var dismiss
+
     @State private var sortBy: SortBy = .startDate
     @State private var sortOrder: Bool = false
-    
+
     var body: some View {
 #if os(macOS)
         MacOSSessionListBuilder()
@@ -36,7 +34,7 @@ struct GameSessionsListView: View {
         }
 #endif
     }
-    
+
 #if os(macOS)
     @ViewBuilder
     func MacOSSessionListBuilder() -> some View {
@@ -46,65 +44,56 @@ struct GameSessionsListView: View {
                     .font(.largeTitle)
                 Spacer()
                 GameSortView()
-                    .frame(maxWidth: 150)
             }
-            .padding([.horizontal, .top], 30)
+            .padding([.horizontal, .top])
             ScrollView {
                 MacCustomSection(header: "Current Game") {
-                    CustomLabel(trailingText: String(gameModel.scoreSystem.score), title: "Score")
+                    CustomLabel(trailingText: String(viewModel.scoreSystem.score), title: "Score")
                     Divider()
-                    CustomLabel(trailingText: String(gameModel.gameLevel.level), title: "Level")
+                    CustomLabel(trailingText: String(viewModel.gameLevel.level), title: "Level")
                     Divider()
-                    CustomLabel(trailingText: String(gameModel.gameLevel.linesCleared), title: "Lines Cleared")
+                    CustomLabel(trailingText: String(viewModel.gameLevel.linesCleared), title: "Lines Cleared")
                     Divider()
-                    CustomLabel(trailingText: String(gameModel.scoreSystem.highScore), title: "High Score")
+                    CustomLabel(trailingText: String(viewModel.scoreSystem.highScore), title: "High Score")
                     Divider()
                     HStack {
-                        Text("Speed \(gameModel.gameLevel.speedPercentage)%")
+                        Text("Speed \(viewModel.gameLevel.speedPercentage)%")
                         Spacer()
-                        SpeedMeterView(percentage: gameModel.gameLevel.speedPercentage)
+                        SpeedMeterView(percentage: viewModel.gameLevel.speedPercentage)
                             .frame(width: 150, height: 10)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                 }
-                
+
                 MacCustomSection(header: "Recent Games", footer: "") {
                     GamesListView(sortBy: sortBy, sortOrder: sortOrder)
                 }
             }
-        }.frame(maxHeight: 650)
-        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
-        .toolbar {
-            if !isWindow {
-                Button("Done") {
-                    dismiss()
-                }
-            }
         }
+        .frame(maxHeight: 650)
+        // .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
     }
 #endif
-    
+
 #if os(iOS)
     @ViewBuilder
     func IOSSessionListBuilder() -> some View {
         List {
             Section(header: Text("Current Game")) {
-                LabeledContent("Score", value: String(gameModel.scoreSystem.score))
-                LabeledContent("Level", value: String(gameModel.gameLevel.level))
-                LabeledContent("Lines Cleared", value: "\(gameModel.gameLevel.linesCleared)")
-                LabeledContent("High Score", value: "\(gameModel.scoreSystem.highScore)")
+                LabeledContent("Score", value: String(viewModel.scoreSystem.score))
+                LabeledContent("Level", value: String(viewModel.gameLevel.level))
+                LabeledContent("Lines Cleared", value: "\(viewModel.gameLevel.linesCleared)")
+                LabeledContent("High Score", value: "\(viewModel.scoreSystem.highScore)")
                 HStack {
-                    Text("Speed \(gameModel.gameLevel.speedPercentage)%")
+                    Text("Speed \(viewModel.gameLevel.speedPercentage)%")
                     Spacer()
-                    SpeedMeterView(percentage: gameModel.gameLevel.speedPercentage)
+                    SpeedMeterView(percentage: viewModel.gameLevel.speedPercentage)
                         .frame(width: 150, height: 10)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
             }
-            .listRowBackground(
-                Rectangle()
-                    .fill(.thinMaterial)
-            )
+            .listRowBackground(Rectangle().fill(.thinMaterial))
+
             Section(header: HStack {
                 Text("Recent Games")
                 Spacer()
@@ -112,26 +101,20 @@ struct GameSessionsListView: View {
             }) {
                 GamesListView(sortBy: sortBy, sortOrder: sortOrder)
             }
-            .listRowBackground(
-                Rectangle()
-                    .fill(.thinMaterial)
-            )
+            .listRowBackground(Rectangle().fill(.thinMaterial))
         }
         .scrollContentBackground(.hidden)
         .navigationTitle("Games")
-        .toolbar(content: {
+        .toolbar {
             ToolbarItem {
-                Button {
-                    dismiss()
-                } label: {
-                    Label("Dismiss", systemImage: "xmark.circle.fill")
+                Button { dismiss() } label: {
+                    Label("Dismiss", systemImage: "xmark")
                 }
-                
             }
-        })
+        }
     }
 #endif
-    
+
     @ViewBuilder
     func GameSortView() -> some View {
         Menu {
@@ -160,10 +143,9 @@ struct GamesListView: View {
     @Environment(\.modelContext) var modelContext
     @Query(sort: \TetrisGameSession.creationDate, order: .reverse) private var gameSessions: [TetrisGameSession]
     @State private var showDeleteConfirmation = false
-    @State private var selectedSessionForAction: TetrisGameSession? // game selected for any action such as delete, show detail
+    @State private var selectedSessionForAction: TetrisGameSession?
 
     init(sortBy: SortBy, sortOrder: Bool) {
-        
         let sortDescriptors: [SortDescriptor<TetrisGameSession>] = switch sortBy {
         case .startDate:
             [SortDescriptor(\TetrisGameSession.creationDate, order: sortOrder ? .forward : .reverse)]
@@ -176,62 +158,55 @@ struct GamesListView: View {
         case .playDuration:
             [SortDescriptor(\TetrisGameSession.playDuration, order: sortOrder ? .forward : .reverse)]
         }
-        
         _gameSessions = Query(sort: sortDescriptors)
-        
-        // Update the hiscore
-        var highScore = UserDefaults.standard.integer(forKey: ScoreSystem.highScoreKey)
-        self.gameSessions.forEach { session in
-            if session.score > highScore {
-                highScore = session.score
-            }
-        }
-        UserDefaults.standard.set(highScore, forKey: ScoreSystem.highScoreKey)
     }
-    
-    var body: some View {
-        if gameSessions.isEmpty {
-            Text("No completed games yet")
-                .foregroundColor(.gray)
-        } else {
-            ForEach(gameSessions) { session in
-                VStack {
-                    SessionTileBuilder(session: session)
-#if os(macOS)
-                    if gameSessions.last?.id != session.id {
-                        Divider()
-                    }
-#endif
-                }
 
-#if os(iOS)
-                .swipeActions(edge: .trailing) {
-                    Button {
-                        showDeleteConfirmation(session: session)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                    .tint(.red)
-                }
+    var body: some View {
+        Group {
+            if gameSessions.isEmpty {
+                Text("No completed games yet")
+                    .foregroundColor(.gray)
+            } else {
+                ForEach(gameSessions) { session in
+                    VStack {
+                        SessionTileBuilder(session: session)
+#if os(macOS)
+                        if gameSessions.last?.id != session.id {
+                            Divider()
+                        }
 #endif
-                .contextMenu {
-                    Button(role: .destructive, action: {
-                        showDeleteConfirmation(session: session)
-                    }, label: {
-                        Label("Delete", systemImage: "trash")
-                    })
+                    }
+#if os(iOS)
+                    .swipeActions(edge: .trailing) {
+                        Button {
+                            showDeleteConfirmation(session: session)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .tint(.red)
+                    }
+#endif
+                    .contextMenu {
+                        Button(role: .destructive, action: {
+                            showDeleteConfirmation(session: session)
+                        }, label: {
+                            Label("Delete", systemImage: "trash")
+                        })
+                    }
                 }
-            }
-            .confirmationDialog("Alert", isPresented: $showDeleteConfirmation, actions: {
-                Button("Delete", role: .destructive) {
-                    deleteGame()
+                .confirmationDialog("Alert", isPresented: $showDeleteConfirmation, actions: {
+                    Button("Delete", role: .destructive) { deleteGame() }
+                }) {
+                    Text("Are you sure you want to delete this game session?")
                 }
-            }) {
-                Text("Are you sure you want to delete this game session?")
             }
         }
+        .onAppear(perform: updateHighScore)
+        .onChange(of: gameSessions.count) { _, _ in
+            updateHighScore()
+        }
     }
-    
+
     @ViewBuilder
     func SessionTileBuilder(session: TetrisGameSession) -> some View {
         HStack {
@@ -251,41 +226,40 @@ struct GamesListView: View {
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
-                
 #if os(macOS)
-                Button {
-                    showDeleteConfirmation(session: session)
-                } label: {
+                Button { showDeleteConfirmation(session: session) } label: {
                     Image(systemName: "trash")
                 }
                 .buttonStyle(PlainButtonStyle())
 #endif
-
             }
         }
     }
-    
+
     func showDeleteConfirmation(session: TetrisGameSession) {
         selectedSessionForAction = session
         showDeleteConfirmation.toggle()
     }
-    
+
     func deleteGame() {
         guard let session = selectedSessionForAction else { return }
-        withAnimation(.linear) {
-            modelContext.delete(session)
-        }
+        withAnimation(.linear) { modelContext.delete(session) }
     }
-    
+
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter
     }
+
+    private func updateHighScore() {
+        let highScore = gameSessions.map(\.score).max() ?? 0
+        UserDefaults.standard.set(highScore, forKey: ScoreSystem.highScoreKey)
+    }
 }
 
 #Preview {
     TetrisGameView()
-        .environmentObject(TetrisGameModel.shared)
+        .environment(GameViewModel())
 }

@@ -8,37 +8,50 @@
 import SwiftUI
 
 struct GameRightView: View {
-    @EnvironmentObject var gameModel: TetrisGameModel
+    @Environment(GameViewModel.self) private var viewModel
+    #if os(macOS)
+    @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
+    #endif
+    
     @Binding var showSettingsSheet: Bool
     @Binding var showInstructionSheet: Bool
     @Binding var showSessionSheet: Bool
-    
+
     var body: some View {
         VStack {
             VStack {
-                NextPieceView(tetromino: gameModel.nextTetromino)
-                NextPieceView(tetromino: gameModel.secondNextTetromino)
+                NextPieceView(tetromino: viewModel.nextTetromino)
+                NextPieceView(tetromino: viewModel.secondNextTetromino)
             }
             .padding(14)
             .background(.ultraThinMaterial)
             .cornerRadius(20)
-            
-//                        Spacer()
-            
+
             VStack {
                 ControlButton(iconName: "questionmark.circle.fill") {
-                    gameModel.pauseGame()
+                    viewModel.pauseGame()
+                    #if os(macOS)
+                    openWindow(id: "howtoplay")
+                    #else
                     showInstructionSheet = true
+                    #endif
                 }
-                
                 ControlButton(iconName: "list.dash") {
-                    gameModel.pauseGame()
+                    viewModel.pauseGame()
+                    #if os(macOS)
+                    openWindow(id: "gamesessions")
+                    #else
                     showSessionSheet = true
+                    #endif
                 }
-//                            Spacer()
                 ControlButton(iconName: "switch.2") {
-                    gameModel.pauseGame()
+                    viewModel.pauseGame()
+                    #if os(macOS)
+                    openSettings()
+                    #else
                     showSettingsSheet = true
+                    #endif
                 }
             }
             .padding(14)
@@ -54,6 +67,5 @@ struct GameRightView: View {
         showInstructionSheet: .constant(false),
         showSessionSheet: .constant(false)
     )
-//    TetrisGameView()
-        .environmentObject(TetrisGameModel.shared)
+    .environment(GameViewModel())
 }

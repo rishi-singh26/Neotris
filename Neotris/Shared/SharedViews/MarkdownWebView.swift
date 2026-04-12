@@ -10,7 +10,7 @@ import MarkdownUI
 import UniformTypeIdentifiers
 
 struct MarkdownWebView: View {
-    @Environment(\.dismiss) var dismiss
+    // @Environment(\.dismiss) var dismiss
 
     let url: URL
 
@@ -67,24 +67,24 @@ struct MarkdownWebView: View {
                 print("Export error: \(error)")
             }
         }
-#if os(macOS)
-        .toolbar {
-            Button("Done") {
-                dismiss()
-            }
-        }
-#else
-        .toolbar(content: {
-            ToolbarItem {
-                Button {
-                    dismiss()
-                } label: {
-                    Label("Dismiss", systemImage: "xmark.circle.fill")
-                }
-                
-            }
-        })
-#endif
+//#if os(macOS)
+//        .toolbar {
+//            Button("Done") {
+//                dismiss()
+//            }
+//        }
+//#else
+//        .toolbar(content: {
+//            ToolbarItem {
+//                Button {
+//                    dismiss()
+//                } label: {
+//                    Label("Dismiss", systemImage: "xmark.circle.fill")
+//                }
+//                
+//            }
+//        })
+//#endif
     }
 
     private func loadMarkdown() {

@@ -24,6 +24,19 @@ enum TetrominoType: String, CaseIterable, Codable {
         }
     }
     
+    // Pivot block index for rotation (the block that stays fixed during rotation)
+    var pivotIndex: Int {
+        switch self {
+        case .i: return 1 // Block(x: 1, y: 0)
+        case .o: return 0 // unused; O doesn't rotate
+        case .t: return 1 // Block(x: 1, y: 0)
+        case .j: return 2 // Block(x: 1, y: 0)
+        case .l: return 2 // Block(x: 1, y: 0)
+        case .s: return 0 // Block(x: 1, y: 0)
+        case .z: return 1 // Block(x: 1, y: 0)
+        }
+    }
+
     // Block configurations for each tetromino type
     var blocks: [Block] {
         switch self {

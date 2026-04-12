@@ -245,5 +245,5 @@ struct CustomDialogTwo: View {
 
 #Preview {
     TetrisGameView()
-        .environmentObject(TetrisGameModel.shared)
+        .environment(GameViewModel())
 }
