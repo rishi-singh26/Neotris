@@ -10,6 +10,7 @@ import SwiftData
 
 struct ThemesListView: View {
     @Environment(GameViewModel.self) private var viewModel
+    @Environment(RemoteDataService.self) private var remoteDataService
     @Environment(\.modelContext) private var modelContext
 
     #if os(macOS)
@@ -87,7 +88,7 @@ struct ThemesListView: View {
     private func IOSViewBuilder() -> some View {
         List {
             Section("Built-in") {
-                ForEach(BuiltInTheme.all) { theme in
+                ForEach(remoteDataService.builtInThemes) { theme in
                     BuiltInThemeRowBuilder(for: theme)
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button {
@@ -177,7 +178,7 @@ struct ThemesListView: View {
         ScrollView {
             MacCustomSection(header: "Built-in") {
                 VStack(spacing: 4) {
-                    ForEach(BuiltInTheme.all) { theme in
+                    ForEach(remoteDataService.builtInThemes) { theme in
                         BuiltInThemeRowBuilder(for: theme)
                             .contextMenu {
                                 Button {
@@ -187,7 +188,7 @@ struct ThemesListView: View {
                                 }
                             }
 
-                        if theme.id != BuiltInTheme.all.last?.id {
+                        if theme.id != remoteDataService.builtInThemes.last?.id {
                             Divider().padding(.vertical, 2)
                         }
                     }
@@ -392,11 +393,13 @@ struct ThemesListView: View {
 #if os(macOS)
     ThemesListView()
         .environment(GameViewModel())
+        .environment(RemoteDataService())
         .modelContainer(for: [TetrisGameSession.self, GameTheme.self], inMemory: true)
     #else
     NavigationView {
         ThemesListView()
             .environment(GameViewModel())
+            .environment(RemoteDataService())
     }
     .modelContainer(for: [TetrisGameSession.self, GameTheme.self], inMemory: true)
     #endif
