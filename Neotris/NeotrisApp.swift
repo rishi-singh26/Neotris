@@ -37,7 +37,7 @@ struct NeotrisApp: App {
 
     var body: some Scene {
         WindowGroup {
-            TetrisGameView()
+            AppUpdateCheckView()
                 .frame(minWidth: gameWidth, maxWidth: .infinity, minHeight: gameHeight, maxHeight: .infinity)
                 .environment(viewModel)
         }
