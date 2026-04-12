@@ -1,0 +1,14 @@
+{
+  "themes": [
+    {
+      "id": "builtin-default",
+      "name": "Default",
+      "tetrominoColors": ["00FFFF", "FFFF00", "AF52DE", "007AFF", "FF9500", "34C759", "FF3B30"],
+      "meshWidth": 3,
+      "meshHeight": 4,
+      "meshColors": ["FDA504", "F78A12", "F68913", "FF3C2F", "AC537F", "D66A4F", "DE7A1C", "996062", "5856D6", "FF2C55", "DA9F26", "E7B438"],
+      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
+      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
+    }
+  ]
+}
