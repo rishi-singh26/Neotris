@@ -11,6 +11,26 @@
       "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
     },
     {
+      "id": "arcade-red",
+      "name": "Arcade Red",
+      "tetrominoColors": ["00E5FF", "FFD60A", "A970FF", "00D084", "4D96FF", "FF9F1C", "2EC4B6"],
+      "meshWidth": 3,
+      "meshHeight": 4,
+      "meshColors": ["D7263D", "D7263D", "D7263D", "D7263D", "D77A10", "D7263D", "D7263D", "D72688", "D7263D", "D7263D", "D7263D", "D7263D"],
+      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
+      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
+    },
+    {
+      "id": "retro-yellow",
+      "name": "Retro Yellow",
+      "tetrominoColors": ["0077B6", "8338EC", "06D6A0", "EF476F", "118AB2", "FB5607", "3A86FF"],
+      "meshWidth": 3,
+      "meshHeight": 4,
+      "meshColors": ["FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "CC97D1", "FF9500", "FF9500", "FF9500", "FF9500"],
+      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
+      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
+    },
+    {
       "id": "builtin-dark",
       "name": "Dark",
       "tetrominoColors": ["00F5FF", "FFE600", "BF5FFF", "0A84FF", "FF6E00", "30D158", "FF375F"],
@@ -57,26 +77,6 @@
       "meshWidth": 3,
       "meshHeight": 4,
       "meshColors": ["FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6"],
-      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
-      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
-    },
-    {
-      "id": "arcade-red",
-      "name": "Arcade Red",
-      "tetrominoColors": ["00E5FF", "FFD60A", "A970FF", "00D084", "4D96FF", "FF9F1C", "2EC4B6"],
-      "meshWidth": 3,
-      "meshHeight": 4,
-      "meshColors": ["D7263D", "D7263D", "D7263D", "D7263D", "D77A10", "D7263D", "D7263D", "D72688", "D7263D", "D7263D", "D7263D", "D7263D"],
-      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
-      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
-    },
-    {
-      "id": "retro-yellow",
-      "name": "Retro Yellow",
-      "tetrominoColors": ["0077B6", "8338EC", "06D6A0", "EF476F", "118AB2", "FB5607", "3A86FF"],
-      "meshWidth": 3,
-      "meshHeight": 4,
-      "meshColors": ["FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "CC97D1", "FF9500", "FF9500", "FF9500", "FF9500"],
       "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
       "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
     }
