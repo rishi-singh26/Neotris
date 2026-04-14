@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 @main
 struct NeotrisApp: App {
@@ -34,6 +35,8 @@ struct NeotrisApp: App {
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
+
+        try? Tips.configure()
     }
 
     var body: some Scene {

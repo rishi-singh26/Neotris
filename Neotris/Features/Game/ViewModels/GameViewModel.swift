@@ -37,6 +37,11 @@ final class GameViewModel {
     var gameSoundEnabled: Bool {
         didSet { UserDefaults.standard.set(gameSoundEnabled, forKey: "gameSoundEnabled") }
     }
+#if os(macOS)
+    var keyBindings: [String: [KeyBinding]] {
+        didSet { Self.saveKeyBindings(keyBindings) }
+    }
+#endif
 
     // MARK: - Active Game Theme
     var activeThemeSnapshot: ActiveThemeSnapshot?
@@ -81,6 +86,9 @@ final class GameViewModel {
         self.gameTheme = UserDefaults.standard.integer(forKey: "gameTheme")
         self.gameSoundEnabled = UserDefaults.standard.bool(forKey: "gameSoundEnabled")
         self.activeThemeSnapshot = Self.loadThemeSnapshot()
+#if os(macOS)
+        self.keyBindings = Self.loadKeyBindings()
+#endif
 
         if self.hapticFeedbackEnabled {
             self.hapticService.prepare()
@@ -102,6 +110,9 @@ final class GameViewModel {
         self.gameTheme = UserDefaults.standard.integer(forKey: "gameTheme")
         self.gameSoundEnabled = UserDefaults.standard.bool(forKey: "gameSoundEnabled")
         self.activeThemeSnapshot = Self.loadThemeSnapshot()
+#if os(macOS)
+        self.keyBindings = Self.loadKeyBindings()
+#endif
 
         self.creationDate = savedState.creationDate
         self.lastPlayedDate = savedState.lastPlayedDate
@@ -320,4 +331,28 @@ final class GameViewModel {
         guard let data = UserDefaults.standard.data(forKey: "activeGameTheme") else { return nil }
         return try? JSONDecoder().decode(ActiveThemeSnapshot.self, from: data)
     }
+
+    // MARK: - Key Bindings (macOS only)
+
+#if os(macOS)
+    /// Returns the active bindings for an action, falling back to the action's defaults.
+    func bindings(for action: GameAction) -> [KeyBinding] {
+        keyBindings[action.rawValue] ?? action.defaultBindings
+    }
+
+    static func loadKeyBindings() -> [String: [KeyBinding]] {
+        guard let data = UserDefaults.standard.data(forKey: "keyBindings"),
+              let bindings = try? JSONDecoder().decode([String: [KeyBinding]].self, from: data)
+        else {
+            return [:]
+        }
+        return bindings
+    }
+
+    static func saveKeyBindings(_ bindings: [String: [KeyBinding]]) {
+        if let data = try? JSONEncoder().encode(bindings) {
+            UserDefaults.standard.set(data, forKey: "keyBindings")
+        }
+    }
+#endif
 }

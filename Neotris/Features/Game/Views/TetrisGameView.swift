@@ -13,6 +13,9 @@ struct TetrisGameView: View {
     @State private var showSessionSheet: Bool = false
     @Environment(GameViewModel.self) private var viewModel
     @Environment(\.colorScheme) var colorScheme
+#if os(macOS)
+    @State private var keyEventMonitor: Any?
+#endif
 
     var body: some View {
         ZStack {
@@ -94,28 +97,47 @@ struct TetrisGameView: View {
             setupKeyboardControls()
             viewModel.prepareHapticsIfEnabled()
         }
+#if os(macOS)
+        .onDisappear {
+            tearDownKeyboardControls()
+        }
+#endif
     }
 
     private func setupKeyboardControls() {
 #if os(macOS)
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if viewModel.gameState == .paused && event.keyCode == 15 {
+        guard keyEventMonitor == nil else { return }
+        keyEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            if viewModel.gameState == .paused && self.matches(event, .resume) {
                 viewModel.resumeGame()
                 return nil
             }
             guard viewModel.gameState == .playing else { return event }
-            switch event.keyCode {
-            case 123: viewModel.moveLeft();  return nil
-            case 124: viewModel.moveRight(); return nil
-            case 125: viewModel.hardDrop();  return nil
-            case 126: viewModel.rotate();    return nil
-            case 49:  viewModel.rotate();    return nil
-            case 35:  viewModel.pauseGame(); return nil
-            default: return event
-            }
+            if self.matches(event, .moveLeft)  { viewModel.moveLeft();  return nil }
+            if self.matches(event, .moveRight) { viewModel.moveRight(); return nil }
+            if self.matches(event, .hardDrop)  { viewModel.hardDrop();  return nil }
+            if self.matches(event, .rotate)    { viewModel.rotate();    return nil }
+            if self.matches(event, .pause)     { viewModel.pauseGame(); return nil }
+            return event
         }
 #endif
     }
+
+#if os(macOS)
+    private func tearDownKeyboardControls() {
+        if let monitor = keyEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyEventMonitor = nil
+        }
+    }
+
+    private func matches(_ event: NSEvent, _ action: GameAction) -> Bool {
+        let eventMods = event.modifierFlags.intersection(KeyBinding.userModifierMask).rawValue
+        return viewModel.bindings(for: action).contains { binding in
+            event.keyCode == binding.keyCode && eventMods == binding.modifierFlags
+        }
+    }
+#endif
 
     private func getColorScheme() -> ColorScheme {
         switch viewModel.gameTheme {
