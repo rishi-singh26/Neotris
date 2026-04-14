@@ -31,6 +31,36 @@
       "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
     },
     {
+      "id": "classic-red",
+      "name": "Classic Red",
+      "tetrominoColors": ["140000", "140000", "140000", "140000", "140000", "140000", "140000"],
+      "meshWidth": 3,
+      "meshHeight": 3,
+      "meshColors": ["ba1f33", "ba1f33", "ba1f33", "ba1f33", "ba1f33", "ba1f33", "ba1f33", "ba1f33", "ba1f33"],
+      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
+      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7]
+    },
+    {
+      "id": "nice-gray",
+      "name": "Nice Gray",
+      "tetrominoColors": ["000000", "000000", "000000", "000000", "000000", "000000", "000000"],
+      "meshWidth": 3,
+      "meshHeight": 3,
+      "meshColors": ["494646", "494646", "494646", "494646", "494646", "494646", "494646", "494646", "494646"],
+      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
+      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7]
+    },
+    {
+      "id": "builtin-sunset",
+      "name": "Sunset",
+      "tetrominoColors": ["FF6B6B", "FFD166", "C77DFF", "FF9F43", "FF4757", "A29BFE", "FD79A8"],
+      "meshWidth": 3,
+      "meshHeight": 4,
+      "meshColors": ["FF4500", "FF6348", "FF4500", "FF7F50", "FF6B35", "E55039", "C85A11", "8E3A59", "B5446E", "7B2D8B", "6C3483", "7B2D8B"],
+      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
+      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
+    },
+    {
       "id": "builtin-dark",
       "name": "Dark",
       "tetrominoColors": ["00F5FF", "FFE600", "BF5FFF", "0A84FF", "FF6E00", "30D158", "FF375F"],
@@ -57,26 +87,6 @@
       "meshWidth": 3,
       "meshHeight": 4,
       "meshColors": ["03045E", "023E8A", "03045E", "0077B6", "0096C7", "0077B6", "00B4D8", "48CAE4", "00B4D8", "90E0EF", "ADE8F4", "90E0EF"],
-      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
-      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
-    },
-    {
-      "id": "builtin-sunset",
-      "name": "Sunset",
-      "tetrominoColors": ["FF6B6B", "FFD166", "C77DFF", "FF9F43", "FF4757", "A29BFE", "FD79A8"],
-      "meshWidth": 3,
-      "meshHeight": 4,
-      "meshColors": ["FF4500", "FF6348", "FF4500", "FF7F50", "FF6B35", "E55039", "C85A11", "8E3A59", "B5446E", "7B2D8B", "6C3483", "7B2D8B"],
-      "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
-      "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
-    },
-    {
-      "id": "sunset-warm",
-      "name": "Sunset Warm",
-      "tetrominoColors": ["FF9F68", "FFD166", "C77DFF", "9BC53D", "FF5C5C", "FF7F50", "F8961E"],
-      "meshWidth": 3,
-      "meshHeight": 4,
-      "meshColors": ["FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6", "FFE8D6"],
       "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
       "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
     }
