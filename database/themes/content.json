@@ -66,7 +66,7 @@
       "tetrominoColors": ["00E5FF", "FFD60A", "A970FF", "00D084", "4D96FF", "FF9F1C", "2EC4B6"],
       "meshWidth": 3,
       "meshHeight": 4,
-      "meshColors": ["D7263D", "D7263D", "D7263D", "D7263D", "D7263D", "D7263D", "D7263D", "D7263D", "D7263D", "D7263D", "D7263D", "D7263D"],
+      "meshColors": ["D7263D", "D7263D", "D7263D", "D7263D", "D77A10", "D7263D", "D7263D", "D72688", "D7263D", "D7263D", "D7263D", "D7263D"],
       "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
       "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
     },
@@ -76,7 +76,7 @@
       "tetrominoColors": ["0077B6", "8338EC", "06D6A0", "EF476F", "118AB2", "FB5607", "3A86FF"],
       "meshWidth": 3,
       "meshHeight": 4,
-      "meshColors": ["FFDD00", "FFDD00", "FFDD00", "FFDD00", "FFDD00", "FFDD00", "FFDD00", "FFDD00", "FFDD00", "FFDD00", "FFDD00", "FFDD00"],
+      "meshColors": ["FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "FF9500", "CC97D1", "FF9500", "FF9500", "FF9500", "FF9500"],
       "meshPointsX": [0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0, 0, 0.5, 1.0],
       "meshPointsY": [0, 0, 0, 0.4, 0.4, 0.4, 0.7, 0.7, 0.7, 1.0, 1.0, 1.0]
     }
