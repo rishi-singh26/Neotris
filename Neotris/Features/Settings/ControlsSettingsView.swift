@@ -8,6 +8,7 @@
 #if os(macOS)
 import SwiftUI
 import AppKit
+import TipKit
 
 struct ControlsSettingsView: View {
     @Environment(GameViewModel.self) private var viewModel
@@ -17,8 +18,12 @@ struct ControlsSettingsView: View {
     /// The temporary NSEvent monitor active during recording.
     @State private var keyMonitor: Any?
 
+    private let controlsDetailTip = KeyboardShortcutsDetailTip()
+
     var body: some View {
         ScrollView {
+            TipView(controlsDetailTip)
+                .padding([.horizontal, .top])
             MacCustomSection(
                 header: "Keyboard Controls",
                 footer: "Each action supports up to \(maxBindingsPerAction) shortcuts. Click a badge to reassign it, or press Escape to cancel."

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct GameRightView: View {
     @Environment(GameViewModel.self) private var viewModel
@@ -17,6 +18,11 @@ struct GameRightView: View {
     @Binding var showSettingsSheet: Bool
     @Binding var showInstructionSheet: Bool
     @Binding var showSessionSheet: Bool
+
+    private let gameThemesTip = GameThemesTip()
+    #if os(macOS)
+    private let keyboardShortcutsTip = KeyboardShortcutsTip()
+    #endif
 
     var body: some View {
         VStack {
@@ -52,6 +58,17 @@ struct GameRightView: View {
                     #else
                     showSettingsSheet = true
                     #endif
+                }
+                .popoverTip(gameThemesTip, arrowEdge: .leading)
+                #if os(macOS)
+                .popoverTip(keyboardShortcutsTip, arrowEdge: .leading)
+                #endif
+                .task {
+                    for await status in gameThemesTip.statusUpdates {
+                        if case .invalidated = status {
+                            GameThemesTip.isDismissed = true
+                        }
+                    }
                 }
             }
             .padding(14)

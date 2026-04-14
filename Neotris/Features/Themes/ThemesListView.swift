@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 struct ThemesListView: View {
     @Environment(GameViewModel.self) private var viewModel
@@ -16,6 +17,8 @@ struct ThemesListView: View {
     #if os(macOS)
     @State private var showAddThemeSheet: Bool = false
     #endif
+    private let themesDetailTip = GameThemesDetailTip()
+
     @State private var themeToEdit: GameTheme? = nil
     @State private var themeToDelete: GameTheme? = nil
     @State private var customThemeToDuplicate: GameTheme? = nil
@@ -87,6 +90,9 @@ struct ThemesListView: View {
     @ViewBuilder
     private func IOSViewBuilder() -> some View {
         List {
+            TipView(themesDetailTip)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
             Section("Built-in") {
                 ForEach(remoteDataService.builtInThemes) { theme in
                     BuiltInThemeRowBuilder(for: theme)
@@ -176,6 +182,8 @@ struct ThemesListView: View {
     @ViewBuilder
     private func MacOSViewBuilder() -> some View {
         ScrollView {
+            TipView(themesDetailTip)
+                .padding([.horizontal, .top])
             MacCustomSection(header: "Built-in") {
                 VStack(spacing: 4) {
                     ForEach(remoteDataService.builtInThemes) { theme in
