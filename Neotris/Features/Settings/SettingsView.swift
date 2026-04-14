@@ -14,6 +14,7 @@ import StoreKit
 enum SettingPage {
     case generalPage
     case themesPage
+    case controlsPage
     case privacyPolicy
     case termsOfUse
 }
@@ -54,6 +55,9 @@ struct SettingsView: View {
             case .themesPage:
                 ThemesListView()
                     .navigationTitle("Game Themes")
+            case .controlsPage:
+                ControlsSettingsView()
+                    .navigationTitle("Controls")
             case .privacyPolicy:
                 MarkdownWebView(url: URL(string: privacyPolicyURL)!)
                     .navigationTitle("Privacy Policy")
@@ -74,6 +78,9 @@ struct SettingsView: View {
             }
             NavigationLink(value: SettingPage.themesPage) {
                 Label("Game Themes", systemImage: "paintpalette")
+            }
+            NavigationLink(value: SettingPage.controlsPage) {
+                Label("Controls", systemImage: "keyboard")
             }
             NavigationLink(value: SettingPage.privacyPolicy) {
                 Label("Privacy Policy", systemImage: "lock.open.display")
